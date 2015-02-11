@@ -16,6 +16,11 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
+
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/NOTICE'
+  }
 }
 
 dependencies {
@@ -43,6 +48,11 @@ dependencies {
   testCompile 'org.easytesting:fest-assert-core:2.0M10'
   testCompile 'org.mockito:mockito-all:1.10.19'
 
+
+  // Android Tests
+  androidTestCompile 'org.apache.commons:commons-io:1.3.2'
+  androidTestCompile 'org.easytesting:fest-assert-core:2.0M10'
+  androidTestCompile 'org.mockito:mockito-all:1.10.19'
 }
 
 
