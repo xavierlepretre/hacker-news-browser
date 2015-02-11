@@ -1,6 +1,7 @@
 package com.ycombinator.news.dto;
 
 import android.annotation.SuppressLint;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
 import java.io.IOException;
@@ -34,5 +35,17 @@ public class PollOptDTOTest
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         assertThat(dateFormat.format(pollOptDTO.getTime())).isEqualTo("2008-04-11 12:02:56");
+    }
+
+    @Test(expected = JsonMappingException.class)
+    public void testFailsOnPollOptMissingRequiredParent() throws IOException
+    {
+        mapper.readValue(getClass().getResourceAsStream("poll_opt_dto_1_no_parent.json"), ItemDTO.class);
+    }
+
+    @Test(expected = JsonMappingException.class)
+    public void testFailsOnPollOptMissingRequiredText() throws IOException
+    {
+        mapper.readValue(getClass().getResourceAsStream("poll_opt_dto_1_no_text.json"), ItemDTO.class);
     }
 }

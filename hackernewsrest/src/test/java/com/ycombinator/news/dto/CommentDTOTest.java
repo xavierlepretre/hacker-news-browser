@@ -1,6 +1,7 @@
 package com.ycombinator.news.dto;
 
 import android.annotation.SuppressLint;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
 import java.io.IOException;
@@ -34,5 +35,17 @@ public class CommentDTOTest
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         assertThat(dateFormat.format(commentDTO.getTime())).isEqualTo("2011-08-25 02:38:47");
+    }
+
+    @Test(expected = JsonMappingException.class)
+    public void testFailsOnCommentMissingRequiredParent() throws IOException
+    {
+        mapper.readValue(getClass().getResourceAsStream("comment_dto_1_no_parent.json"), ItemDTO.class);
+    }
+
+    @Test(expected = JsonMappingException.class)
+    public void testFailsOnCommentMissingRequiredText() throws IOException
+    {
+        mapper.readValue(getClass().getResourceAsStream("comment_dto_1_no_text.json"), ItemDTO.class);
     }
 }

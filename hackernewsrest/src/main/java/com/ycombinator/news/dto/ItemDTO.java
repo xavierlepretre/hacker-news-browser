@@ -1,6 +1,7 @@
 package com.ycombinator.news.dto;
 
 import android.support.annotation.NonNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Date;
@@ -19,9 +20,29 @@ import java.util.Date;
 })
 public class ItemDTO
 {
-    @NonNull ItemId id;
-    @NonNull UserId by;
-    @NonNull Date time;
+    @NonNull private final ItemId id;
+    @NonNull private final UserId by;
+    @NonNull private final Date time;
+
+    ItemDTO(
+            @JsonProperty(value = "id", required = true) @NonNull ItemId id,
+            @JsonProperty(value = "by", required = true) @NonNull UserId by,
+            @JsonProperty(value = "time", required = true) @NonNull Date time)
+    {
+        this.id = id;
+        this.by = by;
+        this.time = time;
+        validate();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void validate()
+    {
+        if (id == null || by == null || time == null)
+        {
+            throw new IllegalArgumentException("Missing id=" + id + ", or by=" + by + ", or time=" + time);
+        }
+    }
 
     @NonNull public ItemId getId()
     {
