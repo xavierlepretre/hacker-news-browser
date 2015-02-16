@@ -41,6 +41,7 @@ public class StoryDTO extends ItemDTO
             throw new IllegalArgumentException("Missing title=" + title + ", or url=" + url);
         }
     }
+
     @NonNull public String getTitle()
     {
         return title;

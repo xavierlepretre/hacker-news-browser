@@ -57,4 +57,12 @@ public class ItemDTOTest
     {
         mapper.readValue(getClass().getResourceAsStream("comment_dto_1_no_time.json"), ItemDTO.class);
     }
+
+    @Test
+    public void testUrlCorrect() throws IOException
+    {
+        ItemDTO itemDTO = mapper.readValue(getClass().getResourceAsStream("comment_dto_1.json"), ItemDTO.class);
+
+        assertThat(itemDTO.getOwnUrl()).isEqualTo("https://news.ycombinator.com/item?id=2921983");
+    }
 }

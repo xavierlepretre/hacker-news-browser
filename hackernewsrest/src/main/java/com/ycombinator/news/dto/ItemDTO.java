@@ -20,6 +20,8 @@ import java.util.Date;
 })
 public class ItemDTO
 {
+    private static final String BASE_URL = "https://news.ycombinator.com/item?id=%d";
+
     @NonNull private final ItemId id;
     @NonNull private final UserId by;
     @NonNull private final Date time;
@@ -57,5 +59,15 @@ public class ItemDTO
     @NonNull public Date getTime()
     {
         return time;
+    }
+
+    @NonNull public String getOwnUrl()
+    {
+        return getOwnUrl(id);
+    }
+
+    @NonNull public static String getOwnUrl(@NonNull ItemId itemId)
+    {
+        return String.format(BASE_URL, itemId.id);
     }
 }
