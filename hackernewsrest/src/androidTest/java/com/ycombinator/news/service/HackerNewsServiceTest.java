@@ -4,12 +4,14 @@ import android.test.AndroidTestCase;
 import com.ycombinator.news.dto.CommentDTO;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
+import com.ycombinator.news.dto.JobDTO;
 import com.ycombinator.news.dto.PollDTO;
 import com.ycombinator.news.dto.PollOptDTO;
 import com.ycombinator.news.dto.StoryDTO;
 import com.ycombinator.news.dto.UpdateDTO;
 import com.ycombinator.news.dto.UserDTO;
 import com.ycombinator.news.dto.UserId;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -99,6 +101,82 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOIterator.hasNext()).isFalse();
     }
 
+    public void testCanFetchOneJob()
+    {
+        Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(new ItemId(9052645)).toBlocking().getIterator();
+
+        assertThat(itemDTOIterator.hasNext()).isTrue();
+        ItemDTO itemDTO = itemDTOIterator.next();
+        assertThat(itemDTO).isNotNull();
+        assertThat(itemDTO).isExactlyInstanceOf(JobDTO.class);
+        assertThat(itemDTO.getId()).isEqualTo(new ItemId(9052645));
+        assertThat(itemDTO.getBy()).isEqualTo(new UserId("alivahab"));
+
+        assertThat(itemDTOIterator.hasNext()).isFalse();
+    }
+
+    public void testCanFetchMoreItems()
+    {
+        Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(Arrays.asList(
+                new ItemId(160705), new ItemId(2921983))).toBlocking().getIterator();
+
+        ItemDTO itemDTO;
+        int count = 2;
+        while (count-- > 0)
+        {
+            itemDTO = itemDTOIterator.next();
+
+            switch (itemDTO.getId().id)
+            {
+                case 160705:
+                    assertThat(itemDTO).isNotNull();
+                    assertThat(itemDTO).isExactlyInstanceOf(PollOptDTO.class);
+                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(160705));
+                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("pg"));
+                    break;
+
+                case 2921983:
+                    assertThat(itemDTO).isNotNull();
+                    assertThat(itemDTO).isExactlyInstanceOf(CommentDTO.class);
+                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(2921983));
+                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("norvig"));
+            }
+        }
+
+        assertThat(itemDTOIterator.hasNext()).isFalse();
+    }
+
+    public void testCanFetchMoreItemsSplit()
+    {
+        Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(Arrays.asList(
+                new ItemId(160705), new ItemId(2921983)), 2).toBlocking().getIterator();
+
+        ItemDTO itemDTO;
+        int count = 2;
+        while (count-- > 0)
+        {
+            itemDTO = itemDTOIterator.next();
+
+            switch (itemDTO.getId().id)
+            {
+                case 160705:
+                    assertThat(itemDTO).isNotNull();
+                    assertThat(itemDTO).isExactlyInstanceOf(PollOptDTO.class);
+                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(160705));
+                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("pg"));
+                    break;
+
+                case 2921983:
+                    assertThat(itemDTO).isNotNull();
+                    assertThat(itemDTO).isExactlyInstanceOf(CommentDTO.class);
+                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(2921983));
+                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("norvig"));
+            }
+        }
+
+        assertThat(itemDTOIterator.hasNext()).isFalse();
+    }
+
     public void testCanFetchTopStories()
     {
         Iterator<List<ItemId>> itemDTOListIterator = hackerNewsService.getTopStories().toBlocking().getIterator();
@@ -128,7 +206,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(udpateDTOIterator.hasNext()).isTrue();
         UpdateDTO updateDTO = udpateDTOIterator.next();
         assertThat(updateDTO.getItems().size()).isGreaterThan(5);
-        assertThat(updateDTO.getProfiles().size()).isGreaterThan(5);
+        assertThat(updateDTO.getProfiles().size()).isGreaterThan(1);
 
         assertThat(udpateDTOIterator.hasNext()).isFalse();
     }

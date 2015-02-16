@@ -24,6 +24,11 @@ public interface HackerNewsServiceRetrofit
             @Path("version") String version,
             @Path("id") int id);
 
+    @GET("/{version}/item/{id}.json")
+    ItemDTO getContentSync(
+            @Path("version") String version,
+            @Path("id") int id);
+
     @GET("/{version}/user/{id}.json")
     Observable<UserDTO> getUser(
             @Path("version") String version,
