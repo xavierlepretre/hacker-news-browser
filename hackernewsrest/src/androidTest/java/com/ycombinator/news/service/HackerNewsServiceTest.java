@@ -118,37 +118,6 @@ public class HackerNewsServiceTest extends AndroidTestCase
     public void testCanFetchMoreItems()
     {
         Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(Arrays.asList(
-                new ItemId(160705), new ItemId(2921983))).toBlocking().getIterator();
-
-        ItemDTO itemDTO;
-        int count = 2;
-        while (count-- > 0)
-        {
-            itemDTO = itemDTOIterator.next();
-
-            switch (itemDTO.getId().id)
-            {
-                case 160705:
-                    assertThat(itemDTO).isNotNull();
-                    assertThat(itemDTO).isExactlyInstanceOf(PollOptDTO.class);
-                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(160705));
-                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("pg"));
-                    break;
-
-                case 2921983:
-                    assertThat(itemDTO).isNotNull();
-                    assertThat(itemDTO).isExactlyInstanceOf(CommentDTO.class);
-                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(2921983));
-                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("norvig"));
-            }
-        }
-
-        assertThat(itemDTOIterator.hasNext()).isFalse();
-    }
-
-    public void testCanFetchMoreItemsSplit()
-    {
-        Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(Arrays.asList(
                 new ItemId(160705), new ItemId(2921983)), 2).toBlocking().getIterator();
 
         ItemDTO itemDTO;
