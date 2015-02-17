@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,11 +59,20 @@ public class ItemDTOTest
         mapper.readValue(getClass().getResourceAsStream("comment_dto_1_no_time.json"), ItemDTO.class);
     }
 
-    @Test
-    public void testUrlCorrect() throws IOException
+    @Test public void testUrlCorrect() throws IOException
     {
         ItemDTO itemDTO = mapper.readValue(getClass().getResourceAsStream("comment_dto_1.json"), ItemDTO.class);
 
         assertThat(itemDTO.getOwnUrl()).isEqualTo("https://news.ycombinator.com/item?id=2921983");
+    }
+
+    @Test public void testCanDeserialiseSerialised() throws IOException
+    {
+        ItemDTO original = new ItemDTO(new ItemId(78), new UserId("amf"), new Date(115, 1, 17, 1, 2, 3));
+        ItemDTO transformed = mapper.readValue(mapper.writeValueAsString(original), ItemDTO.class);
+
+        assertThat(transformed.getId()).isEqualTo(new ItemId(78));
+        assertThat(transformed.getBy()).isEqualTo(new UserId("amf"));
+        assertThat(transformed.getTime()).isEqualTo(new Date(115, 1, 17, 1, 2, 3));
     }
 }

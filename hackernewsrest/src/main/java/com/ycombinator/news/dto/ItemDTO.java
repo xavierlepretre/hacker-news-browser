@@ -1,6 +1,7 @@
 package com.ycombinator.news.dto;
 
 import android.support.annotation.NonNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -61,6 +62,7 @@ public class ItemDTO
         return time;
     }
 
+    @JsonIgnore
     @NonNull public String getOwnUrl()
     {
         return getOwnUrl(id);

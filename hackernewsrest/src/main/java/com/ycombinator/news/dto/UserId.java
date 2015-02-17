@@ -3,6 +3,7 @@ package com.ycombinator.news.dto;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public class UserId
 {
@@ -22,5 +23,11 @@ public class UserId
     {
         return other instanceof UserId
                 && ((UserId) other).id.equals(id);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    @JsonValue String serialise()
+    {
+        return id;
     }
 }

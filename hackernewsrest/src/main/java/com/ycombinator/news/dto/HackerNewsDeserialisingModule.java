@@ -10,5 +10,6 @@ public class HackerNewsDeserialisingModule extends SimpleModule
     {
         super("HackerNewsDeserialisingModule", new Version(1, 0, 0, null, null, null));
         addDeserializer(Date.class, new UnixEpochDateDeserialiser());
+        addSerializer(Date.class, new UnixEpochDateSerialiser());
     }
 }
