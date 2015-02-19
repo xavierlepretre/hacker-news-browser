@@ -15,11 +15,13 @@ import butterknife.InjectView;
 import butterknife.OnItemClick;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemDTOList;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
 import com.ycombinator.news.service.HackerNewsService;
+import com.ycombinator.news.service.LoadingItemDTO;
+import com.ycombinator.news.service.LoadingItemFinishedDTO;
+import com.ycombinator.news.service.LoadingItemStartedDTO;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,25 +180,31 @@ public class TopStoriesActivity extends ActionBarActivity
                             }
                         })
                         .observeOn(Schedulers.io())
-                        .flatMap(new Func1<List<ItemId>, Observable<ItemDTO>>()
+                        .flatMap(new Func1<List<ItemId>, Observable<LoadingItemDTO>>()
                         {
-                            @Override public Observable<ItemDTO> call(List<ItemId> itemIds)
+                            @Override public Observable<LoadingItemDTO> call(List<ItemId> itemIds)
                             {
                                 return hackerNewsService.getContent(adapter.keepUnknown(itemIds));
                             }
                         }))
                 .subscribe(
-                        new Observer<ItemDTO>()
+                        new Observer<LoadingItemDTO>()
                         {
-                            @Override public void onNext(ItemDTO itemDTO)
+                            @Override public void onNext(LoadingItemDTO itemDTO)
                             {
-                                adapter.add(itemDTO);
+                                if (itemDTO instanceof LoadingItemStartedDTO)
+                                {
+                                    adapter.setStartedLoading(((LoadingItemStartedDTO) itemDTO).itemId);
+                                }
+                                else
+                                {
+                                    adapter.add(((LoadingItemFinishedDTO) itemDTO).itemDTO);
+                                }
                                 adapter.notifyDataSetChanged();
                             }
 
                             @Override public void onCompleted()
                             {
-                                adapter.notifyDataSetChanged();
                                 pullToRefresh.setRefreshing(false);
                             }
 

@@ -50,7 +50,7 @@ public class StoryAsIsAdapter extends BaseAdapter
         {
             if (receivedDtos.get(itemId) == null)
             {
-                receivedDtos.put(itemId, new LoadingItemViewDTO(resources, itemId));
+                receivedDtos.put(itemId, new LoadingItemViewDTO(resources, itemId, false));
             }
         }
         notifyDataSetChanged();
@@ -72,6 +72,14 @@ public class StoryAsIsAdapter extends BaseAdapter
             }
         }
         return collected;
+    }
+
+    public void setStartedLoading(@NonNull ItemId itemId)
+    {
+        if (!(receivedDtos.get(itemId) instanceof BaseItemViewDTO))
+        {
+            receivedDtos.put(itemId, new LoadingItemViewDTO(context.getResources(), itemId, true));
+        }
     }
 
     public void addAll(@NonNull List<? extends ItemDTO> objects)

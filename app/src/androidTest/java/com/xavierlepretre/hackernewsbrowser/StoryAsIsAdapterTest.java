@@ -257,4 +257,46 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
         List<ItemId> unknown = adapter.keepUnknown(Arrays.asList(new ItemId(1), new ItemId(2)));
         assertThat(unknown.size()).isEqualTo(0);
     }
+
+    @SmallTest
+    public void testSetIdsMeansScheduled()
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        assertThat(((LoadingItemViewDTO) adapter.getItem(0)).loading).isFalse();
+    }
+
+    @SmallTest
+    public void testSetIdsAndStartedMeansLoading()
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.setStartedLoading(new ItemId(1));
+        assertThat(((LoadingItemViewDTO) adapter.getItem(0)).loading).isTrue();
+    }
+
+    @SmallTest
+    public void testStartedDoesNotNotifyChanged() throws InterruptedException
+    {
+        final CountDownLatch signal = new CountDownLatch(1);
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.registerDataSetObserver(new DataSetObserver()
+        {
+            @Override public void onChanged()
+            {
+                super.onChanged();
+                signal.countDown();
+            }
+        });
+        adapter.setStartedLoading(new ItemId(1));
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
+    }
+
+    @SmallTest
+    public void testSetStartedDoesNotOverwriteFullDto()
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.add(new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), "title", "url", 32, "text"));
+        adapter.setStartedLoading(new ItemId(1));
+        assertThat(adapter.getItem(0)).isExactlyInstanceOf(JobViewDTO.class);
+    }
 }

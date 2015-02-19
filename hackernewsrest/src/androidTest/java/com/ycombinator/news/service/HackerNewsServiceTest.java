@@ -117,29 +117,39 @@ public class HackerNewsServiceTest extends AndroidTestCase
 
     public void testCanFetchMoreItems()
     {
-        Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(Arrays.asList(
+        Iterator<LoadingItemDTO> itemDTOIterator = hackerNewsService.getContent(Arrays.asList(
                 new ItemId(160705), new ItemId(2921983)), 2).toBlocking().getIterator();
 
-        ItemDTO itemDTO;
-        int count = 2;
+        LoadingItemDTO loadingItemDTO;
+        int count = 4;
         while (count-- > 0)
         {
-            itemDTO = itemDTOIterator.next();
+            System.out.println("Count " + count);
+            loadingItemDTO = itemDTOIterator.next();
 
-            switch (itemDTO.getId().id)
+            if (loadingItemDTO instanceof LoadingItemStartedDTO)
             {
-                case 160705:
-                    assertThat(itemDTO).isNotNull();
-                    assertThat(itemDTO).isExactlyInstanceOf(PollOptDTO.class);
-                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(160705));
-                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("pg"));
-                    break;
+                ItemId itemId = ((LoadingItemStartedDTO) loadingItemDTO).itemId;
+                assertThat(itemId).isIn(new ItemId(160705), new ItemId(2921983));
+            }
+            else if (loadingItemDTO instanceof LoadingItemFinishedDTO)
+            {
+                ItemDTO itemDTO = ((LoadingItemFinishedDTO) loadingItemDTO).itemDTO;
+                switch (itemDTO.getId().id)
+                {
+                    case 160705:
+                        assertThat(itemDTO).isNotNull();
+                        assertThat(itemDTO).isExactlyInstanceOf(PollOptDTO.class);
+                        assertThat(itemDTO.getId()).isEqualTo(new ItemId(160705));
+                        assertThat(itemDTO.getBy()).isEqualTo(new UserId("pg"));
+                        break;
 
-                case 2921983:
-                    assertThat(itemDTO).isNotNull();
-                    assertThat(itemDTO).isExactlyInstanceOf(CommentDTO.class);
-                    assertThat(itemDTO.getId()).isEqualTo(new ItemId(2921983));
-                    assertThat(itemDTO.getBy()).isEqualTo(new UserId("norvig"));
+                    case 2921983:
+                        assertThat(itemDTO).isNotNull();
+                        assertThat(itemDTO).isExactlyInstanceOf(CommentDTO.class);
+                        assertThat(itemDTO.getId()).isEqualTo(new ItemId(2921983));
+                        assertThat(itemDTO.getBy()).isEqualTo(new UserId("norvig"));
+                }
             }
         }
 

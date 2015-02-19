@@ -5,8 +5,8 @@
 
   <string name="top_stories_label">Top Stories - Hacker News</string>
 
-  <string name="loading_item">Loading item</string>
   <string name="loading_item_id">Loading item %s</string>
+  <string name="scheduled_item_id">Waiting to load item %s</string>
   <string name="by_author">by %s</string>
   <string name="score_value">Score: %s</string>
 

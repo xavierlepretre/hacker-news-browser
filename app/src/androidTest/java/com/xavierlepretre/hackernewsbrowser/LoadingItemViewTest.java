@@ -30,11 +30,24 @@ public class LoadingItemViewTest extends AndroidTestCase
     }
 
     @SmallTest
-    public void testFieldsPopulated()
+    public void testFieldsPopulatedLoading()
     {
         view.displayItem(new LoadingItemViewDTO(
                 getContext().getResources(),
-                new ItemId(15711)));
+                new ItemId(15711),
+                true));
+        assertThat(view.title.getText().toString()).containsIgnoringCase("Loading");
+        assertThat(view.title.getText().toString()).contains("15,711");
+    }
+
+    @SmallTest
+    public void testFieldsPopulatedScheduled()
+    {
+        view.displayItem(new LoadingItemViewDTO(
+                getContext().getResources(),
+                new ItemId(15711),
+                false));
+        assertThat(view.title.getText().toString()).containsIgnoringCase("Waiting");
         assertThat(view.title.getText().toString()).contains("15,711");
     }
 }

@@ -1,7 +1,7 @@
 package com.xavierlepretre.hackernewsbrowser;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.TextView;
 import butterknife.InjectView;
@@ -26,18 +26,10 @@ public class JobView extends ItemView
         super(context, attrs, defStyleAttr);
     }
 
-    public void displayJob(@Nullable JobViewDTO job)
+    public void displayJob(@NonNull JobViewDTO job)
     {
         displayItem(job);
-        if (job != null)
-        {
-            title.setText(job.title);
-            score.setText(job.score);
-        }
-        else
-        {
-            title.setText(android.R.string.unknownName);
-            score.setText(android.R.string.unknownName);
-        }
+        title.setText(job.title);
+        score.setText(job.score);
     }
 }

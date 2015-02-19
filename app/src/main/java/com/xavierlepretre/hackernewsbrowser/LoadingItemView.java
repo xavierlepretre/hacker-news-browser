@@ -1,7 +1,8 @@
 package com.xavierlepretre.hackernewsbrowser;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import android.support.annotation.ColorRes;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -10,6 +11,9 @@ import butterknife.InjectView;
 
 public class LoadingItemView extends RelativeLayout
 {
+    @ColorRes private static final int SCHEDULED_BG_COLOR_RES = android.R.color.transparent;
+    @ColorRes private static final int LOADING_BG_COLOR_RES = R.color.loading_item_bg;
+
     @InjectView(android.R.id.title) TextView title;
 
     public LoadingItemView(Context context)
@@ -33,18 +37,12 @@ public class LoadingItemView extends RelativeLayout
         ButterKnife.inject(this);
     }
 
-    public void displayItem(@Nullable LoadingItemViewDTO item)
+    public void displayItem(@NonNull LoadingItemViewDTO item)
     {
         if (title != null)
         {
-            if (item == null)
-            {
-                title.setText(R.string.loading_item);
-            }
-            else
-            {
-                title.setText(item.title);
-            }
+            title.setText(item.title);
         }
+        setBackgroundColor(getResources().getColor(item.loading ? LOADING_BG_COLOR_RES : SCHEDULED_BG_COLOR_RES));
     }
 }

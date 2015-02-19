@@ -2,6 +2,7 @@ package com.xavierlepretre.hackernewsbrowser;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -53,20 +54,12 @@ public class ItemView extends RelativeLayout
         super.onDetachedFromWindow();
     }
 
-    public void displayItem(@Nullable BaseItemViewDTO item)
+    public void displayItem(@NonNull BaseItemViewDTO item)
     {
         this.item = item;
-        if (item != null)
-        {
-            author.setText(item.author);
-            age.setText(item.age);
-        }
-        else
-        {
-            author.setText(android.R.string.unknownName);
-            age.setText(android.R.string.unknownName);
-        }
-        openInBrowser.setVisibility(item != null && item.canOpenInBrowser ? View.VISIBLE : View.INVISIBLE);
+        author.setText(item.author);
+        age.setText(item.age);
+        openInBrowser.setVisibility(item.canOpenInBrowser ? View.VISIBLE : View.INVISIBLE);
     }
 
     @SuppressWarnings("UnusedDeclaration")

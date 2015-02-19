@@ -9,11 +9,15 @@ class LoadingItemViewDTO implements ItemViewDTO
 {
     @NonNull final ItemId itemId;
     @NonNull final String title;
+    final boolean loading;
 
-    LoadingItemViewDTO(@NonNull Resources resources, @NonNull ItemId itemId)
+    LoadingItemViewDTO(@NonNull Resources resources, @NonNull ItemId itemId, boolean loading)
     {
         this.itemId = itemId;
-        this.title = resources.getString(R.string.loading_item_id, NumberFormat.getIntegerInstance().format(itemId.id));
+        this.title = resources.getString(
+                loading ? R.string.loading_item_id : R.string.scheduled_item_id,
+                NumberFormat.getIntegerInstance().format(itemId.id));
+        this.loading = loading;
     }
 
     @NonNull @Override public ItemId getItemId()

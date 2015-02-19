@@ -6,9 +6,11 @@ import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.UpdateDTO;
 import com.ycombinator.news.dto.UserDTO;
 import com.ycombinator.news.dto.UserId;
+import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.functions.Func1;
+import rx.subjects.ReplaySubject;
 
 public class HackerNewsService
 {
@@ -39,23 +41,39 @@ public class HackerNewsService
         return service.getContent(version.id, itemId.id);
     }
 
-    @NonNull public Observable<ItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds)
+    @NonNull public Observable<LoadingItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds)
     {
         return getContent(itemIds, PARALLEL_COUNT_STORY);
     }
 
-    @NonNull public Observable<ItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds, int maxConcurrent)
+    @NonNull public Observable<LoadingItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds, int maxConcurrent)
     {
-        return Observable.merge(
-            Observable.from(itemIds)
-                .map(new Func1<ItemId, Observable<ItemDTO>>()
-                {
-                    @Override public Observable<ItemDTO> call(ItemId itemId)
+        final ReplaySubject<LoadingItemDTO> subject = ReplaySubject.create();
+        List<Observable<ItemDTO>> contentFetchers = new ArrayList<>();
+        for (final ItemId itemId : itemIds)
+        {
+            contentFetchers.add(Observable.just(itemId)
+                    .flatMap(new Func1<ItemId, Observable<ItemDTO>>()
                     {
-                        return getContent(itemId);
+                        @Override public Observable<ItemDTO> call(ItemId itemId)
+                        {
+                            subject.onNext(new LoadingItemStartedDTO(itemId));
+                            return getContent(itemId);
+                        }
+                    }));
+        }
+        Observable.merge(
+                contentFetchers,
+                maxConcurrent)
+                .map(new Func1<ItemDTO, LoadingItemDTO>()
+                {
+                    @Override public LoadingItemDTO call(ItemDTO itemDTO)
+                    {
+                        return new LoadingItemFinishedDTO(itemDTO);
                     }
-                }),
-                maxConcurrent);
+                })
+                .subscribe(subject);
+        return subject.asObservable();
     }
 
     @NonNull public Observable<UserDTO> getUser(@NonNull UserId userId)

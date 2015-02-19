@@ -1,7 +1,7 @@
 package com.xavierlepretre.hackernewsbrowser;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.widget.TextView;
 import butterknife.InjectView;
@@ -26,18 +26,10 @@ public class StoryView extends ItemView
         super(context, attrs, defStyleAttr);
     }
 
-    public void displayStory(@Nullable StoryViewDTO story)
+    public void displayStory(@NonNull StoryViewDTO story)
     {
         displayItem(story);
-        if (story != null)
-        {
-            title.setText(story.title);
-            score.setText(story.score);
-        }
-        else
-        {
-            title.setText(android.R.string.unknownName);
-            score.setText(android.R.string.unknownName);
-        }
+        title.setText(story.title);
+        score.setText(story.score);
     }
 }
