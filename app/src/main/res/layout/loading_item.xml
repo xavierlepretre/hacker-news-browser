@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.xavierlepretre.hackernewsbrowser.LoadingItemView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="@style/AppTheme.ListItem"
+    >
+
+  <ImageView
+      android:id="@android:id/progress"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_marginRight="@dimen/item_horizontal_padding"
+      android:layout_marginEnd="@dimen/item_horizontal_padding"
+      style="@android:style/Widget.ProgressBar.Small.Inverse"
+      />
+
+  <TextView
+      android:id="@android:id/title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:lines="1"
+      android:ellipsize="end"
+      style="@style/TextAppearance.AppCompat.Subhead"
+      tools:text="Loading item 1"
+      android:layout_toRightOf="@android:id/progress"
+      android:layout_toEndOf="@android:id/progress"
+      android:layout_centerVertical="true"
+      />
+
+</com.xavierlepretre.hackernewsbrowser.LoadingItemView>
