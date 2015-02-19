@@ -1,0 +1,13 @@
+<resources>
+  <string name="app_name">Hacker News</string>
+
+  <string name="action_settings">Settings</string>
+
+  <string name="top_stories_label">Top Stories - Hacker News</string>
+
+  <string name="loading_item">Loading item</string>
+  <string name="loading_item_id">Loading item %s</string>
+  <string name="by_author">by %s</string>
+  <string name="score_value">Score: %s</string>
+
+</resources>
