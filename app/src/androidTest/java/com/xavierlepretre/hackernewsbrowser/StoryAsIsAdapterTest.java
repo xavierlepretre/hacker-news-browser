@@ -116,6 +116,24 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     }
 
     @SmallTest
+    public void testAddViewDtoDoesNotNotifyChanged() throws InterruptedException
+    {
+        final CountDownLatch signal = new CountDownLatch(1);
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.registerDataSetObserver(new DataSetObserver()
+        {
+            @Override public void onChanged()
+            {
+                super.onChanged();
+                signal.countDown();
+            }
+        });
+        adapter.add(new BaseItemViewDTO(getContext(), new OpenItemDTO(new ItemId(1), new UserId("a"), new Date())));
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
+    }
+
+    @SmallTest
     public void testAddAllDtosDoesNotNotifyChanged() throws InterruptedException
     {
         final CountDownLatch signal = new CountDownLatch(1);
@@ -131,6 +149,26 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
         adapter.addAll(Arrays.asList(
                 new OpenItemDTO(new ItemId(1), new UserId("a"), new Date()),
                 new OpenItemDTO(new ItemId(2), new UserId("b"), new Date())));
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
+    }
+
+    @SmallTest
+    public void testAddAllViewDtosDoesNotNotifyChanged() throws InterruptedException
+    {
+        final CountDownLatch signal = new CountDownLatch(1);
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.registerDataSetObserver(new DataSetObserver()
+        {
+            @Override public void onChanged()
+            {
+                super.onChanged();
+                signal.countDown();
+            }
+        });
+        adapter.addAllViewDtos(Arrays.asList(
+                new BaseItemViewDTO(getContext(), new OpenItemDTO(new ItemId(1), new UserId("a"), new Date())),
+                new BaseItemViewDTO(getContext(), new OpenItemDTO(new ItemId(2), new UserId("b"), new Date()))));
         signal.await(1, TimeUnit.SECONDS);
         assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
     }
@@ -266,37 +304,11 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     }
 
     @SmallTest
-    public void testSetIdsAndStartedMeansLoading()
+    public void testAddLoadingViewDtoDoesNotOverwriteFullDto()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.setStartedLoading(new ItemId(1));
-        assertThat(((LoadingItemViewDTO) adapter.getItem(0)).loading).isTrue();
-    }
-
-    @SmallTest
-    public void testStartedDoesNotNotifyChanged() throws InterruptedException
-    {
-        final CountDownLatch signal = new CountDownLatch(1);
-        adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.registerDataSetObserver(new DataSetObserver()
-        {
-            @Override public void onChanged()
-            {
-                super.onChanged();
-                signal.countDown();
-            }
-        });
-        adapter.setStartedLoading(new ItemId(1));
-        signal.await(1, TimeUnit.SECONDS);
-        assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
-    }
-
-    @SmallTest
-    public void testSetStartedDoesNotOverwriteFullDto()
-    {
-        adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), "title", "url", 32, "text"));
-        adapter.setStartedLoading(new ItemId(1));
+        adapter.add(new JobViewDTO(getContext(), new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), "title", "url", 32, "text")));
+        adapter.add(new LoadingItemViewDTO(getContext().getResources(), new ItemId(1), true));
         assertThat(adapter.getItem(0)).isExactlyInstanceOf(JobViewDTO.class);
     }
 }

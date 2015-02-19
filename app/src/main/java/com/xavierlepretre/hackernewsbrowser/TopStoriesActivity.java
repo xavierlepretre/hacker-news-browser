@@ -20,8 +20,6 @@ import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
 import com.ycombinator.news.service.HackerNewsService;
 import com.ycombinator.news.service.LoadingItemDTO;
-import com.ycombinator.news.service.LoadingItemFinishedDTO;
-import com.ycombinator.news.service.LoadingItemStartedDTO;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +41,7 @@ public class TopStoriesActivity extends ActionBarActivity
     StoryAsIsAdapter adapter;
     ObjectMapper objectMapper;
 
+    Subscription deserialiseSavedInstanceSubscription;
     Subscription topStoriesSubscription;
 
     @InjectView(R.id.refresh_list) SwipeRefreshLayout pullToRefresh;
@@ -81,15 +80,43 @@ public class TopStoriesActivity extends ActionBarActivity
             }
             if (savedInstanceState.containsKey(KEY_DTOS))
             {
-                try
-                {
-                    adapter.addAll(objectMapper.readValue(savedInstanceState.getString(KEY_DTOS), ItemDTOList.class));
-                    adapter.notifyDataSetChanged();
-                }
-                catch (IOException e)
-                {
-                    Log.e("TopStoriesActivity", "Failed to read dtos", e);
-                }
+                deserialiseSavedInstanceSubscription = Observable.just(savedInstanceState.getString(KEY_DTOS))
+                        .subscribeOn(Schedulers.computation())
+                        .map(new Func1<String, List<ItemViewDTO>>()
+                        {
+                            @Override public List<ItemViewDTO> call(String serialised)
+                            {
+                                try
+                                {
+                                    return ItemViewDTOFactory.create(
+                                            TopStoriesActivity.this,
+                                            objectMapper.readValue(serialised, ItemDTOList.class));
+                                }
+                                catch (IOException e)
+                                {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        })
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<List<ItemViewDTO>>()
+                        {
+                            @Override public void onNext(List<ItemViewDTO> itemViewDTOs)
+                            {
+                                adapter.addAllViewDtos(itemViewDTOs);
+                                adapter.notifyDataSetChanged();
+                            }
+
+                            @Override public void onCompleted()
+                            {
+                            }
+
+                            @Override public void onError(Throwable e)
+                            {
+                                Log.e("TopStoriesActivity", "Failed to read dtos", e);
+                            }
+
+                        });
             }
         }
     }
@@ -155,6 +182,10 @@ public class TopStoriesActivity extends ActionBarActivity
 
     @Override protected void onDestroy()
     {
+        if (deserialiseSavedInstanceSubscription != null)
+        {
+            deserialiseSavedInstanceSubscription.unsubscribe();
+        }
         this.adapter = null;
         this.hackerNewsService = null;
         ButterKnife.reset(this);
@@ -186,20 +217,20 @@ public class TopStoriesActivity extends ActionBarActivity
                             {
                                 return hackerNewsService.getContent(adapter.keepUnknown(itemIds));
                             }
+                        })
+                        .map(new Func1<LoadingItemDTO, ItemViewDTO>()
+                        {
+                            @Override public ItemViewDTO call(LoadingItemDTO loadingItemDTO)
+                            {
+                                return ItemViewDTOFactory.create(TopStoriesActivity.this, loadingItemDTO);
+                            }
                         }))
                 .subscribe(
-                        new Observer<LoadingItemDTO>()
+                        new Observer<ItemViewDTO>()
                         {
-                            @Override public void onNext(LoadingItemDTO itemDTO)
+                            @Override public void onNext(ItemViewDTO itemDTO)
                             {
-                                if (itemDTO instanceof LoadingItemStartedDTO)
-                                {
-                                    adapter.setStartedLoading(((LoadingItemStartedDTO) itemDTO).itemId);
-                                }
-                                else
-                                {
-                                    adapter.add(((LoadingItemFinishedDTO) itemDTO).itemDTO);
-                                }
+                                adapter.add(itemDTO);
                                 adapter.notifyDataSetChanged();
                             }
 

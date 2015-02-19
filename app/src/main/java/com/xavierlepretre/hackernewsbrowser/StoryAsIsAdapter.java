@@ -74,14 +74,6 @@ public class StoryAsIsAdapter extends BaseAdapter
         return collected;
     }
 
-    public void setStartedLoading(@NonNull ItemId itemId)
-    {
-        if (!(receivedDtos.get(itemId) instanceof BaseItemViewDTO))
-        {
-            receivedDtos.put(itemId, new LoadingItemViewDTO(context.getResources(), itemId, true));
-        }
-    }
-
     public void addAll(@NonNull List<? extends ItemDTO> objects)
     {
         for (ItemDTO object : objects)
@@ -93,6 +85,23 @@ public class StoryAsIsAdapter extends BaseAdapter
     public void add(@NonNull ItemDTO object)
     {
         this.receivedDtos.put(object.getId(), ItemViewDTOFactory.create(context, object));
+    }
+
+    public void addAllViewDtos(@NonNull List<? extends ItemViewDTO> objects)
+    {
+        for (ItemViewDTO object : objects)
+        {
+            add(object);
+        }
+    }
+
+    public void add(@NonNull ItemViewDTO object)
+    {
+        if (object instanceof BaseItemViewDTO
+            || !(this.receivedDtos.get(object.getItemId()) instanceof BaseItemViewDTO))
+        {
+            this.receivedDtos.put(object.getItemId(), object);
+        }
     }
 
     @Override public boolean hasStableIds()
