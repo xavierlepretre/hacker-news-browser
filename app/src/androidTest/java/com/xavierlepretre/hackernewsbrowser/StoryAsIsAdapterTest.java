@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import rx.functions.Action1;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -320,5 +321,75 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
         adapter.add(new JobViewDTO(getContext(), new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), "title", "url", 32, "text")));
         adapter.add(new LoadingItemViewDTO(getContext().getResources(), new ItemId(1), true));
         assertThat(adapter.getItem(0)).isExactlyInstanceOf(JobViewDTO.class);
+    }
+
+    @SmallTest
+    public void testNoViewDtoAndNoGetItemDoesNotRequestOnItemId() throws InterruptedException
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        final CountDownLatch signal = new CountDownLatch(1);
+        adapter.getRequestedIdsObservable().subscribe(new Action1<ItemId>()
+        {
+            @Override public void call(ItemId itemId)
+            {
+                signal.countDown();
+            }
+        });
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
+    }
+
+    @SmallTest
+    public void testScheduledViewDtoAndGetItemRequestsOnItemId() throws InterruptedException
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.add(new LoadingItemViewDTO(getContext().getResources(), new ItemId(1), false));
+        final CountDownLatch signal = new CountDownLatch(1);
+        adapter.getRequestedIdsObservable().subscribe(new Action1<ItemId>()
+        {
+            @Override public void call(ItemId itemId)
+            {
+                signal.countDown();
+            }
+        });
+        adapter.getItem(0);
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(0).as("We should have got a request for itemId");
+    }
+
+    @SmallTest
+    public void testLoadingViewDtoAndGetItemRequestsOnItemId() throws InterruptedException
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.add(new LoadingItemViewDTO(getContext().getResources(), new ItemId(1), true));
+        final CountDownLatch signal = new CountDownLatch(1);
+        adapter.getRequestedIdsObservable().subscribe(new Action1<ItemId>()
+        {
+            @Override public void call(ItemId itemId)
+            {
+                signal.countDown();
+            }
+        });
+        adapter.getItem(0);
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(0).as("We should have got a request for itemId");
+    }
+
+    @SmallTest
+    public void testProperDtoAndGetItemDoesNotRequestOnItemId() throws InterruptedException
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.add(new OpenStoryDTO(new ItemId(1), new UserId("a"), new Date(), "title", "url", 32, null));
+        final CountDownLatch signal = new CountDownLatch(1);
+        adapter.getRequestedIdsObservable().subscribe(new Action1<ItemId>()
+        {
+            @Override public void call(ItemId itemId)
+            {
+                signal.countDown();
+            }
+        });
+        adapter.getItem(0);
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(1).as("We should have received no request for itemId");
     }
 }

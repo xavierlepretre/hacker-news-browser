@@ -28,7 +28,6 @@ import rx.Observer;
 import rx.Subscription;
 import rx.android.app.AppObservable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -203,21 +202,16 @@ public class TopStoriesActivity extends ActionBarActivity
                 this,
                 hackerNewsService.getTopStories()
                         .observeOn(AndroidSchedulers.mainThread())
-                        .doOnNext(new Action1<List<ItemId>>()
-                        {
-                            @Override public void call(List<ItemId> itemIds)
-                            {
-                                adapter.setIds(itemIds);
-                            }
-                        })
-                        .observeOn(Schedulers.io())
                         .flatMap(new Func1<List<ItemId>, Observable<LoadingItemDTO>>()
                         {
                             @Override public Observable<LoadingItemDTO> call(List<ItemId> itemIds)
                             {
-                                return hackerNewsService.getContent(adapter.keepUnknown(itemIds));
+                                adapter.setIds(itemIds);
+                                pullToRefresh.setRefreshing(false);
+                                return hackerNewsService.getContentFromIds(adapter.getRequestedIdsObservable());
                             }
                         })
+                        .observeOn(Schedulers.computation())
                         .map(new Func1<LoadingItemDTO, ItemViewDTO>()
                         {
                             @Override public ItemViewDTO call(LoadingItemDTO loadingItemDTO)

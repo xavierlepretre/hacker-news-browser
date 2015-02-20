@@ -16,6 +16,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import rx.Observable;
+import rx.functions.Func1;
+import rx.subjects.BehaviorSubject;
 
 public class StoryAsIsAdapter extends BaseAdapter
 {
@@ -35,6 +38,7 @@ public class StoryAsIsAdapter extends BaseAdapter
     @NonNull private LayoutInflater layoutInflater;
     @NonNull private List<ItemId> receivedIds;
     @NonNull private Map<ItemId, ItemViewDTO> receivedDtos;
+    @NonNull private BehaviorSubject<ItemId> requestedIdsSubject;
 
     public StoryAsIsAdapter(@NonNull Context context)
     {
@@ -43,6 +47,20 @@ public class StoryAsIsAdapter extends BaseAdapter
         this.layoutInflater = LayoutInflater.from(context);
         this.receivedIds = new ArrayList<>();
         this.receivedDtos = new HashMap<>();
+        this.requestedIdsSubject = BehaviorSubject.create();
+    }
+
+    @NonNull public Observable<ItemId> getRequestedIdsObservable()
+    {
+        return requestedIdsSubject
+                .distinct(new Func1<ItemId, Integer>()
+                {
+                    @Override public Integer call(ItemId itemId)
+                    {
+                        return itemId.id;
+                    }
+                })
+                .asObservable();
     }
 
     public void setIds(@NonNull Collection<? extends ItemId> itemIds)
@@ -124,7 +142,13 @@ public class StoryAsIsAdapter extends BaseAdapter
 
     @NonNull public ItemViewDTO getItem(int position)
     {
-        return this.receivedDtos.get(receivedIds.get(position));
+        ItemId id = receivedIds.get(position);
+        ItemViewDTO viewDTO = this.receivedDtos.get(id);
+        if (viewDTO instanceof LoadingItemViewDTO)
+        {
+            requestedIdsSubject.onNext(id);
+        }
+        return viewDTO;
     }
 
     @Override public long getItemId(int position)

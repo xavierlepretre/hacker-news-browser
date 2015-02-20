@@ -6,7 +6,6 @@ import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.UpdateDTO;
 import com.ycombinator.news.dto.UserDTO;
 import com.ycombinator.news.dto.UserId;
-import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.functions.Func1;
@@ -48,21 +47,35 @@ public class HackerNewsService
 
     @NonNull public Observable<LoadingItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds, int maxConcurrent)
     {
+        return getContentFromIds(Observable.from(itemIds), maxConcurrent);
+    }
+
+    @NonNull public Observable<LoadingItemDTO> getContentFromIds(@NonNull Observable<ItemId> requestedIds)
+    {
+        return getContentFromIds(requestedIds, PARALLEL_COUNT_STORY);
+    }
+
+    @NonNull public Observable<LoadingItemDTO> getContentFromIds(@NonNull Observable<ItemId> requestedIds, int maxConcurrent)
+    {
         final ReplaySubject<LoadingItemDTO> subject = ReplaySubject.create();
-        List<Observable<ItemDTO>> contentFetchers = new ArrayList<>();
-        for (final ItemId itemId : itemIds)
+        final Func1<ItemId, Observable<ItemDTO>> properCall = new Func1<ItemId, Observable<ItemDTO>>()
         {
-            contentFetchers.add(Observable.just(itemId)
-                    .flatMap(new Func1<ItemId, Observable<ItemDTO>>()
-                    {
-                        @Override public Observable<ItemDTO> call(ItemId itemId)
-                        {
-                            subject.onNext(new LoadingItemStartedDTO(itemId));
-                            return getContent(itemId);
-                        }
-                    }));
-        }
-        getContent(Observable.from(contentFetchers), maxConcurrent)
+            @Override public Observable<ItemDTO> call(ItemId itemId)
+            {
+                // We need to go one step deeper otherwise the subscriber is overwhelmed
+                subject.onNext(new LoadingItemStartedDTO(itemId));
+                return getContent(itemId);
+            }
+        };
+        final Func1<ItemId, Observable<ItemDTO>> preventImmediateCall = new Func1<ItemId, Observable<ItemDTO>>()
+        {
+            // These methods will be called immediately, they are not part of the maxConcurrent
+            @Override public Observable<ItemDTO> call(ItemId itemId)
+            {
+                return Observable.just(itemId).flatMap(properCall);
+            }
+        };
+        getContent(requestedIds.map(preventImmediateCall), maxConcurrent)
                 .subscribe(subject);
         return subject.asObservable();
     }
