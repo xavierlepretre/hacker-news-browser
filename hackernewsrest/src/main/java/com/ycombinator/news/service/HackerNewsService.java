@@ -62,7 +62,14 @@ public class HackerNewsService
                         }
                     }));
         }
-        Observable.merge(
+        getContent(Observable.from(contentFetchers), maxConcurrent)
+                .subscribe(subject);
+        return subject.asObservable();
+    }
+
+    @NonNull public Observable<LoadingItemDTO> getContent(@NonNull Observable<Observable<ItemDTO>> contentFetchers, int maxConcurrent)
+    {
+        return Observable.merge(
                 contentFetchers,
                 maxConcurrent)
                 .map(new Func1<ItemDTO, LoadingItemDTO>()
@@ -71,9 +78,7 @@ public class HackerNewsService
                     {
                         return new LoadingItemFinishedDTO(itemDTO);
                     }
-                })
-                .subscribe(subject);
-        return subject.asObservable();
+                });
     }
 
     @NonNull public Observable<UserDTO> getUser(@NonNull UserId userId)

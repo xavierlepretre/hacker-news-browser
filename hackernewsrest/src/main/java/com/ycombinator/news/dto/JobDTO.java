@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public class JobDTO extends ItemDTO
+    implements TitledDTO, ScoredDTO, TextedDTO, WithUrlDTO
 {
     @NonNull private final String title;
     @NonNull private final String url;
@@ -37,22 +38,22 @@ public class JobDTO extends ItemDTO
         }
     }
 
-    @NonNull public String getTitle()
+    @NonNull @Override public String getTitle()
     {
         return title;
     }
 
-    @NonNull public String getUrl()
+    @NonNull @Override public String getUrl()
     {
         return url;
     }
 
-    public int getScore()
+    @Override public int getScore()
     {
         return score;
     }
 
-    @NonNull public String getText()
+    @NonNull @Override public String getText()
     {
         return text;
     }

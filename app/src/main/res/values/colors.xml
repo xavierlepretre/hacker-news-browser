@@ -2,6 +2,7 @@
 <resources>
 
   <color name="hacker_news_orange">#FF6600</color>
+  <color name="hacker_news_orange_dark">#AA4400</color>
 
   <color name="job_item_bg">#CEDEDD</color>
   <color name="loading_item_bg">#FFBB55</color>

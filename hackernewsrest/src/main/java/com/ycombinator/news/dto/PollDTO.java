@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 public class PollDTO extends ItemDTO
-    implements ParentItemDTO, SplitItemDTO
+    implements ParentItemDTO, SplitItemDTO, TitledDTO, TextedDTO, ScoredDTO
 {
     @NonNull private final String title;
     @NonNull private final String text;
@@ -45,17 +45,17 @@ public class PollDTO extends ItemDTO
         }
     }
 
-    @NonNull public String getTitle()
+    @NonNull @Override public String getTitle()
     {
         return title;
     }
 
-    @NonNull public String getText()
+    @NonNull @Override public String getText()
     {
         return text;
     }
 
-    public int getScore()
+    @Override public int getScore()
     {
         return score;
     }

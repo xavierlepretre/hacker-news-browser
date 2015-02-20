@@ -12,6 +12,7 @@ import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemDTOList;
 import com.ycombinator.news.dto.ItemId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +23,13 @@ public class StoryAsIsAdapter extends BaseAdapter
     private static final int VIEW_TYPE_ITEM = 1;
     private static final int VIEW_TYPE_STORY = 2;
     private static final int VIEW_TYPE_JOB = 3;
+    private static final int VIEW_TYPE_COMMENT = 4;
 
     @LayoutRes private static final int ITEM_LOADING_VIEW_RES = R.layout.loading_item;
     @LayoutRes private static final int ITEM_VIEW_RES = R.layout.item;
     @LayoutRes private static final int STORY_VIEW_RES = R.layout.story;
     @LayoutRes private static final int JOB_VIEW_RES = R.layout.job;
+    @LayoutRes private static final int COMMENT_VIEW_RES = R.layout.comment;
 
     @NonNull private Context context;
     @NonNull private LayoutInflater layoutInflater;
@@ -42,9 +45,9 @@ public class StoryAsIsAdapter extends BaseAdapter
         this.receivedDtos = new HashMap<>();
     }
 
-    public void setIds(@NonNull List<ItemId> itemIds)
+    public void setIds(@NonNull Collection<? extends ItemId> itemIds)
     {
-        this.receivedIds = itemIds;
+        this.receivedIds = new ArrayList<>(itemIds);
         Resources resources = context.getResources();
         for (ItemId itemId : itemIds)
         {
@@ -116,7 +119,7 @@ public class StoryAsIsAdapter extends BaseAdapter
 
     @Override public int getViewTypeCount()
     {
-        return 4;
+        return 5;
     }
 
     @NonNull public ItemViewDTO getItem(int position)
@@ -140,6 +143,10 @@ public class StoryAsIsAdapter extends BaseAdapter
         else if (itemViewDTO instanceof JobViewDTO)
         {
             type = VIEW_TYPE_JOB;
+        }
+        else if (itemViewDTO instanceof CommentViewDTO)
+        {
+            type = VIEW_TYPE_COMMENT;
         }
         else if (itemViewDTO instanceof LoadingItemViewDTO)
         {
@@ -169,6 +176,10 @@ public class StoryAsIsAdapter extends BaseAdapter
                 res = JOB_VIEW_RES;
                 break;
 
+            case VIEW_TYPE_COMMENT:
+                res = COMMENT_VIEW_RES;
+                break;
+
             default:
                 res = ITEM_VIEW_RES;
                 break;
@@ -194,6 +205,10 @@ public class StoryAsIsAdapter extends BaseAdapter
 
             case VIEW_TYPE_JOB:
                 ((JobView) convertView).displayJob((JobViewDTO) getItem(position));
+                break;
+
+            case VIEW_TYPE_COMMENT:
+                ((CommentView) convertView).displayComment((CommentViewDTO) getItem(position));
                 break;
 
             default:

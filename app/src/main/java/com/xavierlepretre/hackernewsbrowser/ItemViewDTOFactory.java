@@ -2,6 +2,7 @@ package com.xavierlepretre.hackernewsbrowser;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.ycombinator.news.dto.CommentDTO;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.JobDTO;
 import com.ycombinator.news.dto.StoryDTO;
@@ -51,6 +52,10 @@ public class ItemViewDTOFactory
         else if (itemDTO instanceof JobDTO)
         {
             created = new JobViewDTO(context, (JobDTO) itemDTO);
+        }
+        else if (itemDTO instanceof CommentDTO)
+        {
+            created = new CommentViewDTO(context, (CommentDTO) itemDTO, 0); // TODO better?
         }
         else
         {

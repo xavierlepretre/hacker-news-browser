@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public class PollOptDTO extends ItemDTO
-    implements KidItemDTO
+    implements KidItemDTO, ScoredDTO, TextedDTO
 {
     @NonNull private final ItemId parent;
     @NonNull private final String text;
@@ -35,17 +35,17 @@ public class PollOptDTO extends ItemDTO
         }
     }
 
-    @Override @NonNull public ItemId getParent()
+    @NonNull @Override public ItemId getParent()
     {
         return parent;
     }
 
-    @NonNull public String getText()
+    @NonNull @Override public String getText()
     {
         return text;
     }
 
-    public int getScore()
+    @Override public int getScore()
     {
         return score;
     }

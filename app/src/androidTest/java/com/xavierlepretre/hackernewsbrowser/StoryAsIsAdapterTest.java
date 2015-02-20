@@ -5,6 +5,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
 import com.ycombinator.news.dto.ItemId;
+import com.ycombinator.news.dto.OpenCommentDTO;
 import com.ycombinator.news.dto.OpenItemDTO;
 import com.ycombinator.news.dto.OpenJobDTO;
 import com.ycombinator.news.dto.OpenStoryDTO;
@@ -247,6 +248,15 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
         adapter.add(new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), "title", "url", 32, "text"));
         View view = adapter.getView(0, null, null);
         assertThat(view).isExactlyInstanceOf(JobView.class);
+    }
+
+    @SmallTest
+    public void testGetViewOfTypeCommentWhenCommentDto()
+    {
+        adapter.setIds(Arrays.asList(new ItemId(1)));
+        adapter.add(new OpenCommentDTO(new ItemId(1), new UserId("a"), new Date(), new ItemId(2), "title", null, false));
+        View view = adapter.getView(0, null, null);
+        assertThat(view).isExactlyInstanceOf(CommentView.class);
     }
 
     @SmallTest

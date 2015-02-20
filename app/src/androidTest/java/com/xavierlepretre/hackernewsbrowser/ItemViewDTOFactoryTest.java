@@ -4,6 +4,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
+import com.ycombinator.news.dto.OpenCommentDTO;
 import com.ycombinator.news.dto.OpenItemDTO;
 import com.ycombinator.news.dto.OpenJobDTO;
 import com.ycombinator.news.dto.OpenStoryDTO;
@@ -63,6 +64,23 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
     }
 
     @SmallTest
+    public void testCreatesComment()
+    {
+        assertThat(
+                ItemViewDTOFactory.create(
+                        getContext(),
+                        new OpenLoadingItemFinishedDTO(
+                                new OpenCommentDTO(
+                                        new ItemId(2),
+                                        new UserId("a"),
+                                        new Date(),
+                                        new ItemId(1),
+                                        "text",
+                                        null,
+                                        false)))).isExactlyInstanceOf(CommentViewDTO.class);
+    }
+
+    @SmallTest
     public void testCreatesDefault()
     {
         assertThat(
@@ -78,7 +96,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
     @SmallTest
     public void testCreatesList()
     {
-        List<ItemDTO> list = Arrays.asList(
+        List<ItemDTO> list = Arrays.<ItemDTO>asList(
                 new OpenJobDTO(
                         new ItemId(1),
                         new UserId("a"),

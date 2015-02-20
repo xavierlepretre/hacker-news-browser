@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="AppTheme.ListItem" parent="AppTheme.ListItem.Base">
+
+    <item name="android:background">?android:attr/selectableItemBackground</item>  <!-- It crashes on v10 for sure, but not on v16 -->
+
+  </style>
+
+</resources>

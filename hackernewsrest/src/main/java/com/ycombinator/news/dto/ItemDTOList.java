@@ -14,6 +14,7 @@ public class ItemDTOList extends ArrayList<ItemDTO>
     {
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public ItemDTOList(@NonNull Collection<? extends ItemDTO> collection)
     {
         super(collection);

@@ -3,13 +3,13 @@ package com.xavierlepretre.hackernewsbrowser;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
@@ -34,8 +34,8 @@ import rx.schedulers.Schedulers;
 
 public class TopStoriesActivity extends ActionBarActivity
 {
-    private final static String KEY_IDS = "TopStoriesActivity.ids";
-    private final static String KEY_DTOS = "TopStoriesActivity.dtos";
+    private final static String KEY_IDS = TopStoriesActivity.class.getName() + ".ids";
+    private final static String KEY_DTOS = TopStoriesActivity.class.getName() + ".dtos";
 
     HackerNewsService hackerNewsService;
     StoryAsIsAdapter adapter;
@@ -52,6 +52,7 @@ public class TopStoriesActivity extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_stories);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         this.hackerNewsService = HackerNewsRestAdapter.createHackerNewsService();
         this.objectMapper = HackerNewsRestAdapter.createHackerNewsMapper();
         this.adapter = new StoryAsIsAdapter(this);
@@ -115,7 +116,6 @@ public class TopStoriesActivity extends ActionBarActivity
                             {
                                 Log.e("TopStoriesActivity", "Failed to read dtos", e);
                             }
-
                         });
             }
         }
@@ -250,8 +250,10 @@ public class TopStoriesActivity extends ActionBarActivity
     @SuppressWarnings("UnusedDeclaration")
     @OnItemClick(android.R.id.list) void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
-        Toast.makeText(this, "Push " + ((ItemViewDTO) parent.getItemAtPosition(position)).getItemId().id, Toast.LENGTH_SHORT)
-                .show();
+        ViewItemActivity.launch(this,
+                view.findViewById(android.R.id.extractArea),
+                objectMapper,
+                (ItemViewDTO) parent.getItemAtPosition(position));
     }
 
     private static class ItemIdList extends ArrayList<ItemId>

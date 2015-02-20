@@ -9,24 +9,29 @@ import java.util.Date;
 import java.util.List;
 
 public class CommentDTO extends ItemDTO
-    implements KidItemDTO, ParentItemDTO
+    implements KidItemDTO, ParentItemDTO, TextedDTO, DeletableDTO
 {
     @NonNull private final ItemId parent;
     @NonNull private final String text;
     @NonNull private final List<ItemId> kids;
+    private final boolean deleted;
 
     CommentDTO(
             @JsonProperty(value = "id", required = true) @NonNull ItemId id,
-            @JsonProperty(value = "by", required = true) @NonNull UserId by,
+            @JsonProperty(value = "by", required = true) @Nullable UserId by,
             @JsonProperty(value = "time", required = true) @NonNull Date time,
             @JsonProperty(value = "parent", required = true) @NonNull ItemId parent,
-            @JsonProperty(value = "text", required = true) @NonNull String text,
-            @JsonProperty(value = "kids") @Nullable List<ItemId> kids)
+            @JsonProperty(value = "text", required = true) @Nullable String text,
+            @JsonProperty(value = "kids") @Nullable List<ItemId> kids,
+            @JsonProperty(value = "deleted", required = false) boolean deleted)
     {
-        super(id, by, time);
+        super(id,
+                by != null ? by : new UserId("deleted"),
+                time);
         this.parent = parent;
-        this.text = text;
+        this.text = text != null ? text : "deleted";
         this.kids = Collections.unmodifiableList(kids != null ? kids : new ArrayList<ItemId>());
+        this.deleted = deleted;
         validate();
     }
 
@@ -44,7 +49,7 @@ public class CommentDTO extends ItemDTO
         return parent;
     }
 
-    @NonNull public String getText()
+    @NonNull @Override public String getText()
     {
         return text;
     }
@@ -52,5 +57,10 @@ public class CommentDTO extends ItemDTO
     @NonNull @Override public List<ItemId> getKids()
     {
         return kids;
+    }
+
+    @Override public boolean isDeleted()
+    {
+        return deleted;
     }
 }

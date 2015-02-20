@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 public class StoryDTO extends ItemDTO
-    implements ParentItemDTO
+    implements ParentItemDTO, TitledDTO, ScoredDTO, WithUrlDTO
 {
     @NonNull private final String title;
     @NonNull private final String url;
@@ -42,17 +42,17 @@ public class StoryDTO extends ItemDTO
         }
     }
 
-    @NonNull public String getTitle()
+    @NonNull @Override public String getTitle()
     {
         return title;
     }
 
-    @NonNull public String getUrl()
+    @NonNull @Override public String getUrl()
     {
         return url;
     }
 
-    public int getScore()
+    @Override public int getScore()
     {
         return score;
     }

@@ -11,13 +11,14 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import butterknife.Optional;
 import com.ycombinator.news.dto.ItemDTOUtil;
 
 public class ItemView extends RelativeLayout
 {
     @InjectView(android.R.id.text1) TextView author;
     @InjectView(R.id.age) TextView age;
-    @InjectView(android.R.id.button1) View openInBrowser;
+    @InjectView(android.R.id.button1) @Optional View openInBrowser;
 
     @Nullable private BaseItemViewDTO item;
 
@@ -59,11 +60,15 @@ public class ItemView extends RelativeLayout
         this.item = item;
         author.setText(item.author);
         age.setText(item.age);
-        openInBrowser.setVisibility(item.canOpenInBrowser ? View.VISIBLE : View.INVISIBLE);
+        if (openInBrowser != null)
+        {
+            openInBrowser.setVisibility(item.canOpenInBrowser ? View.VISIBLE : View.INVISIBLE);
+        }
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @OnClick(android.R.id.button1) void launchBrowser()
+    @OnClick(android.R.id.button1) @Optional
+    void launchBrowser()
     {
         getContext().startActivity(getBrowserIntent());
     }

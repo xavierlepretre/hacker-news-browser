@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.xavierlepretre.hackernewsbrowser.ItemViewAnimator
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:shownIn="@layout/activity_view_item"
+    >
+
+  <include
+      android:id="@android:id/progress"
+      layout="@layout/loading_item"/>
+
+  <include
+      android:id="@+id/story"
+      layout="@layout/story_header" />
+
+  <include
+      android:id="@+id/job"
+      layout="@layout/job_header" />
+
+</com.xavierlepretre.hackernewsbrowser.ItemViewAnimator>

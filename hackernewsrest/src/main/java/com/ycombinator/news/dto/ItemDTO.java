@@ -43,7 +43,9 @@ public class ItemDTO
     {
         if (id == null || by == null || time == null)
         {
-            throw new IllegalArgumentException("Missing id=" + id + ", or by=" + by + ", or time=" + time);
+            throw new IllegalArgumentException("Missing id=" + (id == null ? null : id.id)
+                    + ", or by=" + (by == null ? null : by.id)
+                    + ", or time=" + time);
         }
     }
 
