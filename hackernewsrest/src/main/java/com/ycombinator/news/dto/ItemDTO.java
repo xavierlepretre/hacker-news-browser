@@ -1,6 +1,7 @@
 package com.ycombinator.news.dto;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -26,15 +27,22 @@ public class ItemDTO
     @NonNull private final ItemId id;
     @NonNull private final UserId by;
     @NonNull private final Date time;
+    private final boolean deleted;
 
+    /**
+     * If Jackson allowed it, we would have made 2 different constructors to account for the "deleted" case.
+     */
     ItemDTO(
             @JsonProperty(value = "id", required = true) @NonNull ItemId id,
-            @JsonProperty(value = "by", required = true) @NonNull UserId by,
-            @JsonProperty(value = "time", required = true) @NonNull Date time)
+            @JsonProperty(value = "by", required = true) @Nullable UserId by,
+            @JsonProperty(value = "time", required = true) @NonNull Date time,
+            @JsonProperty(value = "deleted") boolean deleted)
     {
         this.id = id;
-        this.by = by;
+        //noinspection ConstantConditions
+        this.by = by != null ? by : (deleted ? new UserId("deleted") : null);
         this.time = time;
+        this.deleted = deleted;
         validate();
     }
 
@@ -57,6 +65,11 @@ public class ItemDTO
     @NonNull public UserId getBy()
     {
         return by;
+    }
+
+    public boolean isDeleted()
+    {
+        return deleted;
     }
 
     @NonNull public Date getTime()

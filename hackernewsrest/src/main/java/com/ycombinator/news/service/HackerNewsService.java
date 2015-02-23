@@ -13,7 +13,7 @@ import rx.subjects.ReplaySubject;
 
 public class HackerNewsService
 {
-    public final static int PARALLEL_COUNT_STORY = 3;
+    public final static int PARALLEL_COUNT_CONTENT = 3;
 
     @NonNull private final HackerNewsServiceRetrofit service;
     @NonNull private final ApiVersion version;
@@ -42,7 +42,7 @@ public class HackerNewsService
 
     @NonNull public Observable<LoadingItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds)
     {
-        return getContent(itemIds, PARALLEL_COUNT_STORY);
+        return getContent(itemIds, PARALLEL_COUNT_CONTENT);
     }
 
     @NonNull public Observable<LoadingItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds, int maxConcurrent)
@@ -52,7 +52,7 @@ public class HackerNewsService
 
     @NonNull public Observable<LoadingItemDTO> getContentFromIds(@NonNull Observable<ItemId> requestedIds)
     {
-        return getContentFromIds(requestedIds, PARALLEL_COUNT_STORY);
+        return getContentFromIds(requestedIds, PARALLEL_COUNT_CONTENT);
     }
 
     @NonNull public Observable<LoadingItemDTO> getContentFromIds(@NonNull Observable<ItemId> requestedIds, int maxConcurrent)

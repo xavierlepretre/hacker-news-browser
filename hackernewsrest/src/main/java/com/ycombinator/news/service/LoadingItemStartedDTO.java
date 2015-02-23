@@ -11,4 +11,9 @@ public class LoadingItemStartedDTO implements LoadingItemDTO
     {
         this.itemId = itemId;
     }
+
+    @NonNull @Override public ItemId getItemId()
+    {
+        return itemId;
+    }
 }

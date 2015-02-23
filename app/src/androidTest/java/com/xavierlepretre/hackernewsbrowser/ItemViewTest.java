@@ -46,9 +46,9 @@ public class ItemViewTest extends AndroidTestCase
     @SmallTest
     public void testFieldsPopulated()
     {
-        view.displayItem(new BaseItemViewDTO(
+        view.displayItem(new ItemView.DTO(
                 getContext(),
-                new OpenItemDTO(new ItemId(1), new UserId("fgtr"), new Date())));
+                new OpenItemDTO(new ItemId(1), new UserId("fgtr"), new Date(), false)));
         assertThat(view.author.getText().toString()).contains("fgtr");
         assertThat(view.age.getText()).isNotNull();
     }
@@ -56,9 +56,9 @@ public class ItemViewTest extends AndroidTestCase
     @SmallTest
     public void testIntentContainsIdAndYCombinator()
     {
-        view.displayItem(new BaseItemViewDTO(
+        view.displayItem(new ItemView.DTO(
                 getContext(),
-                new OpenItemDTO(new ItemId(1098), new UserId("fgtr"), new Date())));
+                new OpenItemDTO(new ItemId(1098), new UserId("fgtr"), new Date(), false)));
         Intent browserIntent = view.getBrowserIntent();
         //noinspection ConstantConditions
         assertThat(browserIntent.getData().toString()).contains("1098");

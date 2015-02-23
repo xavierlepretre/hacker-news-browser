@@ -2,6 +2,7 @@ package com.xavierlepretre.hackernewsbrowser;
 
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.ycombinator.news.dto.CollapsedState;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.OpenCommentDTO;
@@ -26,8 +27,8 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                 getContext(),
                 new OpenLoadingItemStartedDTO(
                         new ItemId(1)));
-        assertThat(itemViewDTO).isExactlyInstanceOf(LoadingItemViewDTO.class);
-        assertThat(((LoadingItemViewDTO) itemViewDTO).loading).isTrue();
+        assertThat(itemViewDTO).isExactlyInstanceOf(LoadingItemView.DTO.class);
+        assertThat(((LoadingItemView.DTO) itemViewDTO).loading).isTrue();
     }
 
     @SmallTest
@@ -40,10 +41,11 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                                 new ItemId(1),
                                 new UserId("a"),
                                 new Date(),
+                                false,
                                 "title",
                                 "http://urlshouldbe.ok/here",
                                 32,
-                                null))).isExactlyInstanceOf(StoryViewDTO.class);
+                                null))).isExactlyInstanceOf(StoryView.DTO.class);
     }
 
     @SmallTest
@@ -57,10 +59,11 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                                         new ItemId(1),
                                         new UserId("a"),
                                         new Date(),
+                                        false,
                                         "title",
                                         "url",
                                         32,
-                                        "text")))).isExactlyInstanceOf(JobViewDTO.class);
+                                        "text")))).isExactlyInstanceOf(JobView.DTO.class);
     }
 
     @SmallTest
@@ -74,10 +77,90 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                                         new ItemId(2),
                                         new UserId("a"),
                                         new Date(),
+                                        false,
                                         new ItemId(1),
                                         "text",
-                                        null,
-                                        false)))).isExactlyInstanceOf(CommentViewDTO.class);
+                                        null)))).isExactlyInstanceOf(CommentView.DTO.class);
+    }
+
+    @SmallTest
+    public void testCreatesCommentWithCollapsibleTrue()
+    {
+        ItemViewDTO viewDTO = ItemViewDTOFactory.create(
+                getContext(),
+                new OpenLoadingItemFinishedDTO(
+                        new OpenCommentDTO(
+                                new ItemId(2),
+                                new UserId("a"),
+                                new Date(),
+                                false,
+                                new ItemId(1),
+                                "text",
+                                null)),
+                new CollapsedState(true));
+        assertThat(viewDTO).isExactlyInstanceOf(CommentView.DTO.class);
+        CommentView.DTO commentViewDTO = (CommentView.DTO) viewDTO;
+        assertThat(commentViewDTO.isCollapsed()).isTrue();
+    }
+
+    @SmallTest
+    public void testCreatesCommentWithCollapsibleFalse()
+    {
+        ItemViewDTO viewDTO = ItemViewDTOFactory.create(
+                getContext(),
+                new OpenLoadingItemFinishedDTO(
+                        new OpenCommentDTO(
+                                new ItemId(2),
+                                new UserId("a"),
+                                new Date(),
+                                false,
+                                new ItemId(1),
+                                "text",
+                                null)),
+                new CollapsedState(false));
+        assertThat(viewDTO).isExactlyInstanceOf(CommentView.DTO.class);
+        CommentView.DTO commentViewDTO = (CommentView.DTO) viewDTO;
+        assertThat(commentViewDTO.isCollapsed()).isFalse();
+    }
+
+    @SmallTest
+    public void testCreatesCommentWithCollapsibleDepthIsCollapsed()
+    {
+        ItemViewDTO viewDTO = ItemViewDTOFactory.create(
+                getContext(),
+                new OpenCommentDTO(
+                        new ItemId(2),
+                        new UserId("a"),
+                        new Date(),
+                        false,
+                        new ItemId(1),
+                        "text",
+                        null),
+                new CollapsedState(1));
+        assertThat(viewDTO).isExactlyInstanceOf(CommentView.DTO.class);
+        CommentView.DTO commentViewDTO = (CommentView.DTO) viewDTO;
+        assertThat(commentViewDTO.isCollapsed()).isTrue();
+    }
+
+    @SmallTest
+    public void testCreatesCommentWithDepth()
+    {
+        ItemViewDTO viewDTO = ItemViewDTOFactory.create(
+                getContext(),
+                new OpenCommentDTO(
+                        new ItemId(2),
+                        new UserId("a"),
+                        new Date(),
+                        false,
+                        new ItemId(1),
+                        "text",
+                        null),
+                3,
+                true);
+        assertThat(viewDTO).isExactlyInstanceOf(CommentView.DTO.class);
+        CommentView.DTO commentViewDTO = (CommentView.DTO) viewDTO;
+        assertThat(commentViewDTO.getZeroBasedDepth()).isEqualTo(3);
+        assertThat(commentViewDTO.isCollapsed()).isTrue();
     }
 
     @SmallTest
@@ -90,7 +173,8 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                                 new OpenItemDTO(
                                         new ItemId(1),
                                         new UserId("a"),
-                                        new Date())))).isExactlyInstanceOf(BaseItemViewDTO.class);
+                                        new Date(),
+                                        false)))).isExactlyInstanceOf(ItemView.DTO.class);
     }
 
     @SmallTest
@@ -101,6 +185,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                         new ItemId(1),
                         new UserId("a"),
                         new Date(),
+                        false,
                         "title",
                         "url",
                         32,
@@ -109,15 +194,16 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                         new ItemId(2),
                         new UserId("a"),
                         new Date(),
+                        false,
                         "title",
                         "http://urlshouldbe.ok/here",
                         32,
                         null));
         List<ItemViewDTO> created = ItemViewDTOFactory.create(getContext(), list);
         assertThat(created.size()).isEqualTo(2);
-        assertThat(created.get(0)).isExactlyInstanceOf(JobViewDTO.class);
+        assertThat(created.get(0)).isExactlyInstanceOf(JobView.DTO.class);
         assertThat(created.get(0).getItemId()).isEqualTo(new ItemId(1));
-        assertThat(created.get(1)).isExactlyInstanceOf(StoryViewDTO.class);
+        assertThat(created.get(1)).isExactlyInstanceOf(StoryView.DTO.class);
         assertThat(created.get(1).getItemId()).isEqualTo(new ItemId(2));
     }
 }

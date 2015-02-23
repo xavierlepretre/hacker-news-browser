@@ -12,14 +12,29 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
 
-    <ImageView
+    <ViewSwitcher
         android:id="@android:id/progress"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/item_horizontal_padding"
         android:layout_marginEnd="@dimen/item_horizontal_padding"
-        style="@android:style/Widget.ProgressBar.Small.Inverse"
-        />
+        >
+
+      <ImageView
+          android:layout_width="24dp"
+          android:layout_height="24dp"
+          android:src="@mipmap/time"
+          android:contentDescription="@string/schedule_icon_description"
+          />
+
+      <ImageView
+          android:layout_width="24dp"
+          android:layout_height="24dp"
+          android:src="@mipmap/loading"
+          android:contentDescription="@string/loading_icon_description"
+          />
+
+    </ViewSwitcher>
 
     <TextView
         android:id="@android:id/title"
@@ -27,7 +42,7 @@
         android:layout_height="wrap_content"
         android:lines="1"
         android:ellipsize="end"
-        style="@style/TextAppearance.AppCompat.Subhead"
+        style="@style/AppThemeSubhead"
         tools:text="Loading item 1"
         android:layout_toRightOf="@android:id/progress"
         android:layout_toEndOf="@android:id/progress"

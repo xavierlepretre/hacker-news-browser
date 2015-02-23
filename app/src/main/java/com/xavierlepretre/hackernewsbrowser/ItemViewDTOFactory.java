@@ -2,6 +2,8 @@ package com.xavierlepretre.hackernewsbrowser;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import com.ycombinator.news.dto.CollapsedState;
 import com.ycombinator.news.dto.CommentDTO;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.JobDTO;
@@ -16,14 +18,19 @@ public class ItemViewDTOFactory
 {
     @NonNull public static ItemViewDTO create(@NonNull Context context, LoadingItemDTO loadingItemDTO)
     {
+        return create(context, loadingItemDTO, null);
+    }
+
+    @NonNull public static ItemViewDTO create(@NonNull Context context, LoadingItemDTO loadingItemDTO, @Nullable CollapsedState collapsible)
+    {
         ItemViewDTO created;
         if (loadingItemDTO instanceof LoadingItemFinishedDTO)
         {
-            created = create(context, ((LoadingItemFinishedDTO) loadingItemDTO).itemDTO);
+            created = create(context, ((LoadingItemFinishedDTO) loadingItemDTO).itemDTO, collapsible);
         }
         else if (loadingItemDTO instanceof LoadingItemStartedDTO)
         {
-            created = new LoadingItemViewDTO(context.getResources(), ((LoadingItemStartedDTO) loadingItemDTO).itemId, true);
+            created = new LoadingItemView.DTO(context.getResources(), ((LoadingItemStartedDTO) loadingItemDTO).itemId, true);
         }
         else
         {
@@ -42,24 +49,38 @@ public class ItemViewDTOFactory
         return created;
     }
 
-    @NonNull public static BaseItemViewDTO create(@NonNull Context context, @NonNull ItemDTO itemDTO)
+    @NonNull public static ItemView.DTO create(@NonNull Context context, @NonNull ItemDTO itemDTO)
     {
-        BaseItemViewDTO created;
+        return create(context, itemDTO, 0, false);
+    }
+
+    @NonNull public static ItemView.DTO create(@NonNull Context context, @NonNull ItemDTO itemDTO, @Nullable CollapsedState collapsible)
+    {
+        return create(
+                context,
+                itemDTO,
+                collapsible == null ? 0 : collapsible.zeroBasedDepth,
+                collapsible != null && collapsible.isCollapsed());
+    }
+
+    @NonNull public static ItemView.DTO create(@NonNull Context context, @NonNull ItemDTO itemDTO, int zeroBasedDepth, boolean collapsed)
+    {
+        ItemView.DTO created;
         if (itemDTO instanceof StoryDTO)
         {
-            created = new StoryViewDTO(context, (StoryDTO) itemDTO);
+            created = new StoryView.DTO(context, (StoryDTO) itemDTO);
         }
         else if (itemDTO instanceof JobDTO)
         {
-            created = new JobViewDTO(context, (JobDTO) itemDTO);
+            created = new JobView.DTO(context, (JobDTO) itemDTO);
         }
         else if (itemDTO instanceof CommentDTO)
         {
-            created = new CommentViewDTO(context, (CommentDTO) itemDTO, 0); // TODO better?
+            created = new CommentView.DTO(context, (CommentDTO) itemDTO, zeroBasedDepth, collapsed);
         }
         else
         {
-            created = new BaseItemViewDTO(context, itemDTO);
+            created = new ItemView.DTO(context, itemDTO);
         }
         return created;
     }

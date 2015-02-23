@@ -12,25 +12,60 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="horizontal"
+      android:gravity="center"
       >
+
+    <ImageView
+        android:id="@android:id/button2"
+        android:layout_width="@dimen/button_icon_size"
+        android:layout_height="@dimen/button_icon_size"
+        android:src="@mipmap/arrow_up"
+        android:contentDescription="@string/go_up_to_parent_item_description"
+        />
+
+    <ImageView
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
+        android:layout_marginRight="@dimen/item_horizontal_padding"
+        android:layout_marginEnd="@dimen/item_horizontal_padding"
+        android:src="@mipmap/user"
+        android:contentDescription="@string/user_icon_description"
+        />
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="by jg"
+        tools:text="jg"
         android:lines="1"
-        style="@style/TextAppearance.AppCompat.Caption"
+        style="@style/AppThemeCaption"
         />
 
-    <TextView
-        android:id="@+id/age"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:gravity="end"
-        tools:text="1 minute ago"
-        style="@style/TextAppearance.AppCompat.Caption"
-        />
+        tools:ignore="UseCompoundDrawables">
+
+      <TextView
+          android:id="@+id/age"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          tools:text="1 minute ago"
+          style="@style/AppThemeCaption"
+          />
+
+      <ImageView
+          android:layout_width="@dimen/small_icon_size"
+          android:layout_height="@dimen/small_icon_size"
+          android:src="@mipmap/time"
+          android:layout_marginLeft="@dimen/item_horizontal_padding"
+          android:layout_marginStart="@dimen/item_horizontal_padding"
+          android:contentDescription="@string/age_icon_description"
+          />
+
+    </LinearLayout>
 
   </LinearLayout>
 
@@ -41,5 +76,63 @@
       android:layout_below="@android:id/title"
       tools:text="Oh, good. Now I can stop using the old interface in Firefox. That makes me happy; Inbox works with my brain a lot better."
       />
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@android:id/content"
+      android:gravity="center"
+      >
+
+    <ViewAnimator
+        android:id="@+id/collapsed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/item_horizontal_padding"
+        android:layout_marginEnd="@dimen/item_horizontal_padding"
+        >
+
+      <ImageView
+          android:layout_width="0dp"
+          android:layout_height="@dimen/small_icon_size"
+          android:contentDescription="@string/no_comment_collapse_description"
+          />
+
+      <ImageView
+          android:layout_width="@dimen/small_icon_size"
+          android:layout_height="@dimen/small_icon_size"
+          android:src="@mipmap/arrow_right"
+          android:contentDescription="@string/comment_click_expand"
+          />
+
+      <ImageView
+          android:layout_width="@dimen/small_icon_size"
+          android:layout_height="@dimen/small_icon_size"
+          android:src="@mipmap/arrow_down"
+          android:contentDescription="@string/comment_click_collapse"
+          />
+
+    </ViewAnimator>
+
+    <ImageView
+        android:id="@android:id/icon1"
+        android:layout_width="@dimen/small_icon_size"
+        android:layout_height="@dimen/small_icon_size"
+        android:src="@mipmap/comment"
+        android:layout_marginRight="@dimen/item_horizontal_padding"
+        android:layout_marginEnd="@dimen/item_horizontal_padding"
+        android:contentDescription="@string/comment_icon_description"
+        />
+
+    <TextView
+        android:id="@android:id/custom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        style="@style/AppThemeCaption"
+        tools:text="3"
+        />
+
+  </LinearLayout>
 
 </com.xavierlepretre.hackernewsbrowser.CommentView>

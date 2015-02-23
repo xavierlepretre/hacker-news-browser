@@ -1,6 +1,8 @@
 package com.ycombinator.news.service;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import com.ycombinator.news.dto.CommentDTO;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
@@ -27,11 +29,13 @@ public class HackerNewsServiceTest extends AndroidTestCase
         hackerNewsService = HackerNewsRestAdapter.createHackerNewsService();
     }
 
+    @SmallTest
     public void testServiceCreated()
     {
         assertThat(hackerNewsService).isNotNull();
     }
 
+    @LargeTest
     public void testCanFetchOneUser()
     {
         Iterator<UserDTO> userDTOIterator = hackerNewsService.getUser(new UserId("jl")).toBlocking().getIterator();
@@ -45,6 +49,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(userDTOIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchOneStory()
     {
         Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(new ItemId(8863)).toBlocking().getIterator();
@@ -59,6 +64,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchOneComment()
     {
         Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(new ItemId(2921983)).toBlocking().getIterator();
@@ -73,6 +79,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchOnePoll()
     {
         Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(new ItemId(126809)).toBlocking().getIterator();
@@ -87,6 +94,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchOnePollOpt()
     {
         Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(new ItemId(160705)).toBlocking().getIterator();
@@ -101,6 +109,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchOneJob()
     {
         Iterator<ItemDTO> itemDTOIterator = hackerNewsService.getContent(new ItemId(9052645)).toBlocking().getIterator();
@@ -115,6 +124,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchMoreItems()
     {
         Iterator<LoadingItemDTO> itemDTOIterator = hackerNewsService.getContent(Arrays.asList(
@@ -156,6 +166,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchTopStories()
     {
         Iterator<List<ItemId>> itemDTOListIterator = hackerNewsService.getTopStories().toBlocking().getIterator();
@@ -167,6 +178,7 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemDTOListIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchMaxItem()
     {
         Iterator<ItemId> itemIdIterator = hackerNewsService.getMaxItem().toBlocking().getIterator();
@@ -178,15 +190,16 @@ public class HackerNewsServiceTest extends AndroidTestCase
         assertThat(itemIdIterator.hasNext()).isFalse();
     }
 
+    @LargeTest
     public void testCanFetchUpdates()
     {
-        Iterator<UpdateDTO> udpateDTOIterator = hackerNewsService.getUpdates().toBlocking().getIterator();
+        Iterator<UpdateDTO> updateDTOIterator = hackerNewsService.getUpdates().toBlocking().getIterator();
 
-        assertThat(udpateDTOIterator.hasNext()).isTrue();
-        UpdateDTO updateDTO = udpateDTOIterator.next();
+        assertThat(updateDTOIterator.hasNext()).isTrue();
+        UpdateDTO updateDTO = updateDTOIterator.next();
         assertThat(updateDTO.getItems().size()).isGreaterThan(5);
         assertThat(updateDTO.getProfiles().size()).isGreaterThan(1);
 
-        assertThat(udpateDTOIterator.hasNext()).isFalse();
+        assertThat(updateDTOIterator.hasNext()).isFalse();
     }
 }

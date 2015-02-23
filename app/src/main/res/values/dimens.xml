@@ -5,6 +5,11 @@
 
   <dimen name="item_horizontal_padding">8dp</dimen>
 
-  <dimen name="comment_indentation">16dp</dimen>
+  <dimen name="comment_indentation">24dp</dimen>
+  <integer name="comment_indentation_max">4</integer>
+  <dimen name="small_icon_size">16dp</dimen>
+  <dimen name="medium_icon_size">32dp</dimen>
+
+  <dimen name="button_icon_size">48dp</dimen>
 
 </resources>

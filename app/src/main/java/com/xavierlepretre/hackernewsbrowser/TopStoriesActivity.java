@@ -1,6 +1,7 @@
 package com.xavierlepretre.hackernewsbrowser;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -154,7 +155,7 @@ public class TopStoriesActivity extends ActionBarActivity
 
     @Override protected void onStop()
     {
-        this.topStoriesSubscription.unsubscribe();
+        unsubscribe(this.topStoriesSubscription);
         super.onStop();
     }
 
@@ -181,10 +182,7 @@ public class TopStoriesActivity extends ActionBarActivity
 
     @Override protected void onDestroy()
     {
-        if (deserialiseSavedInstanceSubscription != null)
-        {
-            deserialiseSavedInstanceSubscription.unsubscribe();
-        }
+        unsubscribe(deserialiseSavedInstanceSubscription);
         this.adapter = null;
         this.hackerNewsService = null;
         ButterKnife.reset(this);
@@ -242,12 +240,21 @@ public class TopStoriesActivity extends ActionBarActivity
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @OnItemClick(android.R.id.list) void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    @OnItemClick(android.R.id.list)
+    void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
         ViewItemActivity.launch(this,
                 view.findViewById(android.R.id.extractArea),
                 objectMapper,
                 (ItemViewDTO) parent.getItemAtPosition(position));
+    }
+
+    protected void unsubscribe(@Nullable Subscription subscription)
+    {
+        if (subscription != null)
+        {
+            subscription.unsubscribe();
+        }
     }
 
     private static class ItemIdList extends ArrayList<ItemId>

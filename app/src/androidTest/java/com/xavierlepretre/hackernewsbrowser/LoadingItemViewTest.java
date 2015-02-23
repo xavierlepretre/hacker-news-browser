@@ -32,7 +32,7 @@ public class LoadingItemViewTest extends AndroidTestCase
     @SmallTest
     public void testFieldsPopulatedLoading()
     {
-        view.displayItem(new LoadingItemViewDTO(
+        view.displayItem(new LoadingItemView.DTO(
                 getContext().getResources(),
                 new ItemId(15711),
                 true));
@@ -43,7 +43,7 @@ public class LoadingItemViewTest extends AndroidTestCase
     @SmallTest
     public void testFieldsPopulatedScheduled()
     {
-        view.displayItem(new LoadingItemViewDTO(
+        view.displayItem(new LoadingItemView.DTO(
                 getContext().getResources(),
                 new ItemId(15711),
                 false));

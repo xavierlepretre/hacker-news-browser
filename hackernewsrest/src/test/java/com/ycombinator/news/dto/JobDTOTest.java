@@ -31,7 +31,7 @@ public class JobDTOTest
         assertThat(dateFormat.format(jobDTO.getTime())).isEqualTo("2015-02-15 22:19:09");
         assertThat(jobDTO.getScore()).isEqualTo(1);
         assertThat(jobDTO.getUrl()).isEqualTo("https://angel.co/chariot/jobs/45415-lead-designer");
-        assertThat(jobDTO.getText()).isEqualTo("");
+        assertThat(jobDTO.getText()).isEqualTo("No text");
         assertThat(jobDTO.getTitle()).isEqualTo("Chariot (YC W15) Looking for Lead Designer");
     }
 

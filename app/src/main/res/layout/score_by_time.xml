@@ -6,20 +6,22 @@
     android:layout_height="match_parent">
 
   <RelativeLayout
+      android:id="@+id/score_by_time"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_below="@android:id/title"
-      >
+      android:layout_below="@id/title_container"
+      tools:ignore="DuplicateIncludedIds">
 
     <ImageView
         android:id="@android:id/button1"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@android:drawable/ic_menu_set_as"
+        android:layout_width="@dimen/button_icon_size"
+        android:layout_height="@dimen/button_icon_size"
+        android:src="@mipmap/world"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:visibility="gone"
+        android:contentDescription="@string/open_in_browser_description"
         tools:visibility="visible"
         />
 
@@ -37,41 +39,121 @@
       <RelativeLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:orientation="horizontal"
+          android:gravity="center_vertical"
           >
+
+        <ImageView
+            android:id="@android:id/icon"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:layout_marginRight="@dimen/item_horizontal_padding"
+            android:layout_marginEnd="@dimen/item_horizontal_padding"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:src="@mipmap/score"
+            android:contentDescription="@string/score_icon_description"
+            />
 
         <TextView
             android:id="@android:id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Score: 1,234"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_toRightOf="@android:id/icon"
+            android:layout_toEndOf="@android:id/icon"
+            tools:text="1,234"
+            style="@style/AppThemeCaption"
             />
 
-        <TextView
-            android:id="@android:id/text1"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="by jg"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
+            android:orientation="horizontal"
             android:layout_toRightOf="@android:id/text2"
             android:layout_toEndOf="@android:id/text2"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:gravity="end"
-            style="@style/TextAppearance.AppCompat.Caption"
-            />
+            tools:ignore="UseCompoundDrawables">
+
+          <TextView
+              android:id="@android:id/text1"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              tools:text="jg"
+              android:gravity="end"
+              style="@style/AppThemeCaption"
+              />
+
+          <ImageView
+              android:layout_width="@dimen/small_icon_size"
+              android:layout_height="@dimen/small_icon_size"
+              android:layout_marginLeft="@dimen/item_horizontal_padding"
+              android:layout_marginStart="@dimen/item_horizontal_padding"
+              android:src="@mipmap/user"
+              android:contentDescription="@string/user_icon_description"
+              />
+
+        </LinearLayout>
 
       </RelativeLayout>
 
-      <TextView
-          android:id="@+id/age"
-          android:layout_width="wrap_content"
+      <RelativeLayout
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          tools:text="1 minute ago"
-          style="@style/TextAppearance.AppCompat.Caption"
-          />
+          >
+
+        <ImageView
+            android:id="@android:id/icon1"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@mipmap/comment"
+            android:layout_marginRight="@dimen/item_horizontal_padding"
+            android:layout_marginEnd="@dimen/item_horizontal_padding"
+            android:contentDescription="@string/comment_icon_description"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            />
+
+        <TextView
+            android:id="@android:id/custom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@android:id/icon1"
+            android:layout_toEndOf="@android:id/icon1"
+            android:visibility="invisible"
+            style="@style/AppThemeCaption"
+            tools:text="3"
+            tools:visibility="visible"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@android:id/custom"
+            android:layout_toEndOf="@android:id/custom"
+            android:gravity="end"
+            tools:ignore="UseCompoundDrawables">
+
+          <TextView
+              android:id="@+id/age"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              tools:text="1 minute ago"
+              style="@style/AppThemeCaption"
+              />
+
+          <ImageView
+              android:layout_width="@dimen/small_icon_size"
+              android:layout_height="@dimen/small_icon_size"
+              android:src="@mipmap/time"
+              android:layout_marginLeft="@dimen/item_horizontal_padding"
+              android:layout_marginStart="@dimen/item_horizontal_padding"
+              android:contentDescription="@string/age_icon_description"
+              />
+
+        </LinearLayout>
+
+      </RelativeLayout>
 
     </LinearLayout>
 

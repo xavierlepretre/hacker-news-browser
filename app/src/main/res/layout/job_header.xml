@@ -4,20 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/AppTheme.ListItem"
-    android:background="@color/job_item_bg"
+    style="@style/AppTheme.ListItem.Job"
     >
 
-  <TextView
-      android:id="@android:id/title"
+  <LinearLayout
+      android:id="@+id/title_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:gravity="center"
-      style="@style/TextAppearance.AppCompat.Subhead"
-      tools:text="Centralized App Logging with Fluentd Centralized App Logging with Fluentd"
+      android:orientation="horizontal"
+      android:gravity="center_vertical"
       android:layout_alignParentTop="true"
-      />
+      tools:ignore="UseCompoundDrawables">
 
-  <include layout="@layout/score_by_time" />
+    <ImageView
+        android:layout_width="@dimen/medium_icon_size"
+        android:layout_height="@dimen/medium_icon_size"
+        android:layout_marginRight="@dimen/item_horizontal_padding"
+        android:layout_marginEnd="@dimen/item_horizontal_padding"
+        android:src="@mipmap/job"
+        android:contentDescription="@string/job_type_icon"
+        />
+
+    <TextView
+        android:id="@android:id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        style="@style/AppThemeSubhead"
+        tools:text="Centralized App Logging with Fluentd Centralized App Logging with Fluentd"
+        />
+
+  </LinearLayout>
+
+  <include layout="@layout/score_by_time"/>
+
+  <TextView
+      android:id="@android:id/content"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/score_by_time"
+      tools:text="Text of Job"
+      style="@style/AppThemeBody1"
+      />
 
 </com.xavierlepretre.hackernewsbrowser.JobView>

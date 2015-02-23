@@ -20,12 +20,13 @@ public class StoryDTO extends ItemDTO
             @JsonProperty(value = "id", required = true) @NonNull ItemId id,
             @JsonProperty(value = "by", required = true) @NonNull UserId by,
             @JsonProperty(value = "time", required = true) @NonNull Date time,
+            @JsonProperty(value = "deleted") boolean deleted,
             @JsonProperty(value = "title") @NonNull String title,
             @JsonProperty(value = "url") @NonNull String url,
             @JsonProperty(value = "score") int score,
             @JsonProperty(value = "kids") @Nullable List<ItemId> kids)
     {
-        super(id, by, time);
+        super(id, by, time, deleted);
         this.title = title;
         this.url = url;
         this.score = score;

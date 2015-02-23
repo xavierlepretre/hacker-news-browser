@@ -52,9 +52,22 @@ public class StoryViewTest extends AndroidTestCase
     @SmallTest
     public void testFieldsPopulated()
     {
-        view.displayStory(new StoryViewDTO(
+        view.displayStory(new StoryView.DTO(
                 getContext(),
-                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), "a good title", "http://url1.com", 345, null)));
+                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, "a good title", "http://url1.com", 345, null)));
+        assertThat(view.author.getText().toString()).contains("fgtr");
+        assertThat(view.age.getText()).isNotNull();
+        assertThat(view.title.getText().toString()).contains("a good title");
+        assertThat(view.score.getText().toString()).contains("345");
+    }
+
+    @SmallTest
+    public void testFieldsHeaderPopulated()
+    {
+        view = (StoryView) LayoutInflater.from(getContext()).inflate(R.layout.story_header, null);
+        view.displayStory(new StoryView.DTO(
+                getContext(),
+                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, "a good title", "http://url1.com", 345, null)));
         assertThat(view.author.getText().toString()).contains("fgtr");
         assertThat(view.age.getText()).isNotNull();
         assertThat(view.title.getText().toString()).contains("a good title");
@@ -64,9 +77,9 @@ public class StoryViewTest extends AndroidTestCase
     @SmallTest
     public void testIntentContainsGivenUrl()
     {
-        view.displayStory(new StoryViewDTO(
+        view.displayStory(new StoryView.DTO(
                 getContext(),
-                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), "a good title", "http://url1.com", 345, null)));
+                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, "a good title", "http://url1.com", 345, null)));
         Intent browserIntent = view.getBrowserIntent();
         //noinspection ConstantConditions
         assertThat(browserIntent.getData().toString()).contains("http://url1.com");

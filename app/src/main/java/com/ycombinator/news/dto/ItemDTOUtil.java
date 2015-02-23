@@ -38,4 +38,26 @@ public class ItemDTOUtil
         }
         return title;
     }
+
+    @NonNull public static String getCopyableText(@NonNull ItemDTO item)
+    {
+        String copied;
+        if (item instanceof TextedDTO)
+        {
+            copied = ((TextedDTO) item).getText();
+        }
+        else if (item instanceof WithUrlDTO)
+        {
+            copied = ((WithUrlDTO) item).getUrl();
+        }
+        else if (item instanceof TitledDTO)
+        {
+            copied = ((TitledDTO) item).getTitle();
+        }
+        else
+        {
+            copied = item.getOwnUrl();
+        }
+        return copied;
+    }
 }

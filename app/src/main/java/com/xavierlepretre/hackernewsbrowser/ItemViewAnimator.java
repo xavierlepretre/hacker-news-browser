@@ -2,7 +2,6 @@ package com.xavierlepretre.hackernewsbrowser;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ViewAnimator;
@@ -14,8 +13,6 @@ public class ItemViewAnimator extends ViewAnimator
     @InjectView(android.R.id.progress) LoadingItemView loadingView;
     @InjectView(R.id.story) StoryView storyView;
     @InjectView(R.id.job) JobView jobView;
-
-    private ItemViewDTO viewDTO;
 
     public ItemViewAnimator(Context context)
     {
@@ -35,33 +32,27 @@ public class ItemViewAnimator extends ViewAnimator
 
     public void displayItem(@NonNull ItemViewDTO item)
     {
-        if (item instanceof StoryViewDTO)
+        if (item instanceof StoryView.DTO)
         {
             setDisplayedChild(1);
-            storyView.displayStory((StoryViewDTO) item);
+            storyView.displayStory((StoryView.DTO) item);
         }
-        else if (item instanceof JobViewDTO)
+        else if (item instanceof JobView.DTO)
         {
             setDisplayedChild(2);
-            jobView.displayJob((JobViewDTO) item);
+            jobView.displayJob((JobView.DTO) item);
         }
         else
         {
             setDisplayedChild(0);
-            if (item instanceof LoadingItemViewDTO)
+            if (item instanceof LoadingItemView.DTO)
             {
-                loadingView.displayItem((LoadingItemViewDTO) item);
+                loadingView.displayItem((LoadingItemView.DTO) item);
             }
             else
             {
                 Log.e("ItemViewAnimator", "Unhandled ItemViewDTO :" + item);
             }
         }
-        this.viewDTO = item;
-    }
-
-    @Nullable public ItemViewDTO getViewDTO()
-    {
-        return viewDTO;
     }
 }

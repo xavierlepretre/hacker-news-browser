@@ -15,11 +15,12 @@ public class PollOptDTO extends ItemDTO
             @JsonProperty(value = "id", required = true) @NonNull ItemId id,
             @JsonProperty(value = "by", required = true) @NonNull UserId by,
             @JsonProperty(value = "time", required = true) @NonNull Date time,
+            @JsonProperty(value = "deleted") boolean deleted,
             @JsonProperty(value = "parent", required = true) @NonNull ItemId parent,
             @JsonProperty(value = "text", required = true) @NonNull String text,
             @JsonProperty(value = "score") int score)
     {
-        super(id, by, time);
+        super(id, by, time, deleted);
         this.parent = parent;
         this.text = text;
         this.score = score;

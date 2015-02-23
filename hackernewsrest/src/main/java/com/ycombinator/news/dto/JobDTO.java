@@ -16,12 +16,13 @@ public class JobDTO extends ItemDTO
             @JsonProperty(value = "id", required = true) @NonNull ItemId id,
             @JsonProperty(value = "by", required = true) @NonNull UserId by,
             @JsonProperty(value = "time", required = true) @NonNull Date time,
+            @JsonProperty(value = "deleted") boolean deleted,
             @JsonProperty(value = "title", required = true) @NonNull String title,
             @JsonProperty(value = "url") @NonNull String url,
             @JsonProperty(value = "score") int score,
             @JsonProperty(value = "text", required = true) @NonNull String text)
     {
-        super(id, by, time);
+        super(id, by, time, deleted);
         this.title = title;
         this.url = url;
         this.score = score;

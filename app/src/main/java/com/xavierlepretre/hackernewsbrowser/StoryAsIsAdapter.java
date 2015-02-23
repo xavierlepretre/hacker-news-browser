@@ -34,11 +34,12 @@ public class StoryAsIsAdapter extends BaseAdapter
     @LayoutRes private static final int JOB_VIEW_RES = R.layout.job;
     @LayoutRes private static final int COMMENT_VIEW_RES = R.layout.comment;
 
-    @NonNull private Context context;
-    @NonNull private LayoutInflater layoutInflater;
+    @NonNull protected final Context context;
+    @NonNull private final LayoutInflater layoutInflater;
     @NonNull private List<ItemId> receivedIds;
-    @NonNull private Map<ItemId, ItemViewDTO> receivedDtos;
-    @NonNull private BehaviorSubject<ItemId> requestedIdsSubject;
+    @NonNull private final Map<ItemId, ItemViewDTO> receivedDtos;
+    @NonNull private final BehaviorSubject<ItemId> requestedIdsSubject;
+    @NonNull private final BehaviorSubject<PositionedItemId> backToParentSubject;
 
     public StoryAsIsAdapter(@NonNull Context context)
     {
@@ -48,6 +49,7 @@ public class StoryAsIsAdapter extends BaseAdapter
         this.receivedIds = new ArrayList<>();
         this.receivedDtos = new HashMap<>();
         this.requestedIdsSubject = BehaviorSubject.create();
+        this.backToParentSubject = BehaviorSubject.create();
     }
 
     @NonNull public Observable<ItemId> getRequestedIdsObservable()
@@ -63,6 +65,11 @@ public class StoryAsIsAdapter extends BaseAdapter
                 .asObservable();
     }
 
+    @NonNull public Observable<PositionedItemId> getBackToParentObservable()
+    {
+        return backToParentSubject.asObservable();
+    }
+
     public void setIds(@NonNull Collection<? extends ItemId> itemIds)
     {
         this.receivedIds = new ArrayList<>(itemIds);
@@ -71,7 +78,7 @@ public class StoryAsIsAdapter extends BaseAdapter
         {
             if (receivedDtos.get(itemId) == null)
             {
-                receivedDtos.put(itemId, new LoadingItemViewDTO(resources, itemId, false));
+                receivedDtos.put(itemId, new LoadingItemView.DTO(resources, itemId, false));
             }
         }
         notifyDataSetChanged();
@@ -87,9 +94,9 @@ public class StoryAsIsAdapter extends BaseAdapter
         ItemDTOList collected = new ItemDTOList();
         for (ItemViewDTO viewDTO : receivedDtos.values())
         {
-            if (viewDTO instanceof BaseItemViewDTO)
+            if (viewDTO instanceof ItemView.DTO)
             {
-                collected.add(((BaseItemViewDTO) viewDTO).itemDTO);
+                collected.add(((ItemView.DTO) viewDTO).itemDTO);
             }
         }
         return collected;
@@ -118,8 +125,8 @@ public class StoryAsIsAdapter extends BaseAdapter
 
     public void add(@NonNull ItemViewDTO object)
     {
-        if (object instanceof BaseItemViewDTO
-            || !(this.receivedDtos.get(object.getItemId()) instanceof BaseItemViewDTO))
+        if (object instanceof ItemView.DTO
+            || !(this.receivedDtos.get(object.getItemId()) instanceof ItemView.DTO))
         {
             this.receivedDtos.put(object.getItemId(), object);
         }
@@ -144,7 +151,7 @@ public class StoryAsIsAdapter extends BaseAdapter
     {
         ItemId id = receivedIds.get(position);
         ItemViewDTO viewDTO = this.receivedDtos.get(id);
-        if (viewDTO instanceof LoadingItemViewDTO)
+        if (viewDTO instanceof LoadingItemView.DTO)
         {
             requestedIdsSubject.onNext(id);
         }
@@ -160,19 +167,19 @@ public class StoryAsIsAdapter extends BaseAdapter
     {
         int type;
         ItemViewDTO itemViewDTO = getItem(position);
-        if (itemViewDTO instanceof StoryViewDTO)
+        if (itemViewDTO instanceof StoryView.DTO)
         {
             type = VIEW_TYPE_STORY;
         }
-        else if (itemViewDTO instanceof JobViewDTO)
+        else if (itemViewDTO instanceof JobView.DTO)
         {
             type = VIEW_TYPE_JOB;
         }
-        else if (itemViewDTO instanceof CommentViewDTO)
+        else if (itemViewDTO instanceof CommentView.DTO)
         {
             type = VIEW_TYPE_COMMENT;
         }
-        else if (itemViewDTO instanceof LoadingItemViewDTO)
+        else if (itemViewDTO instanceof LoadingItemView.DTO)
         {
             type = VIEW_TYPE_ITEM_LOADING;
         }
@@ -216,42 +223,62 @@ public class StoryAsIsAdapter extends BaseAdapter
         if (convertView == null)
         {
             convertView = layoutInflater.inflate(getItemViewRes(position), null);
+            if (convertView instanceof KidItemView)
+            {
+                ((KidItemView) convertView).getBackToParentObservable()
+                        .map(new Func1<ItemId, PositionedItemId>()
+                        {
+                            @Override public PositionedItemId call(ItemId itemId)
+                            {
+                                return new PositionedItemId(itemId, receivedIds.indexOf(itemId));
+                            }
+                        })
+                        .subscribe(backToParentSubject);
+            }
         }
         switch (getItemViewType(position))
         {
             case VIEW_TYPE_ITEM_LOADING:
-                ((LoadingItemView) convertView).displayItem((LoadingItemViewDTO) getItem(position));
+                ((LoadingItemView) convertView).displayItem((LoadingItemView.DTO) getItem(position));
                 break;
 
             case VIEW_TYPE_STORY:
-                ((StoryView) convertView).displayStory((StoryViewDTO) getItem(position));
+                ((StoryView) convertView).displayStory((StoryView.DTO) getItem(position));
                 break;
 
             case VIEW_TYPE_JOB:
-                ((JobView) convertView).displayJob((JobViewDTO) getItem(position));
+                ((JobView) convertView).displayJob((JobView.DTO) getItem(position));
                 break;
 
             case VIEW_TYPE_COMMENT:
-                ((CommentView) convertView).displayComment((CommentViewDTO) getItem(position));
+                ((CommentView) convertView).displayComment((CommentView.DTO) getItem(position));
                 break;
 
             default:
-                ((ItemView) convertView).displayItem((BaseItemViewDTO) getItem(position));
+                ((ItemView) convertView).displayItem((ItemView.DTO) getItem(position));
                 break;
         }
         return convertView;
     }
 
-    @NonNull public List<ItemId> keepUnknown(@NonNull List<ItemId> fromList)
+    public void toggleCollapsible(@NonNull ItemId itemId)
     {
-        List<ItemId> unknown = new ArrayList<>(fromList);
-        for (ItemViewDTO viewDTO : receivedDtos.values())
+        ItemViewDTO viewDTO = receivedDtos.get(itemId);
+        if (viewDTO instanceof Collapsible)
         {
-            if (viewDTO instanceof BaseItemViewDTO)
-            {
-                unknown.remove(viewDTO.getItemId());
-            }
+            ((Collapsible) viewDTO).toggleCollapsed();
         }
-        return unknown;
+    }
+
+    public static class PositionedItemId
+    {
+        @NonNull public final ItemId itemId;
+        public final int position;
+
+        public PositionedItemId(@NonNull ItemId itemId, int position)
+        {
+            this.itemId = itemId;
+            this.position = position;
+        }
     }
 }

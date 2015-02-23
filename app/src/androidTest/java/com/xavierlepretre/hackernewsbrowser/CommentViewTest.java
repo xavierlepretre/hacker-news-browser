@@ -48,10 +48,11 @@ public class CommentViewTest extends AndroidTestCase
     @SmallTest
     public void testFieldsPopulated()
     {
-        view.displayComment(new CommentViewDTO(
+        view.displayComment(new CommentView.DTO(
                 getContext(),
-                new OpenCommentDTO(new ItemId(1), new UserId("fgtr"), new Date(), new ItemId(2), "a good title", null, false),
-                0));
+                new OpenCommentDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, new ItemId(2), "a good title", null),
+                0,
+                false));
         assertThat(view.author.getText().toString()).contains("fgtr");
         assertThat(view.age.getText()).isNotNull();
         assertThat(view.text.getText().toString()).contains("a good title");

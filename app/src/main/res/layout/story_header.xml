@@ -7,16 +7,184 @@
     style="@style/AppTheme.ListItem"
     >
 
-  <TextView
-      android:id="@android:id/title"
+  <LinearLayout
+      android:id="@+id/title_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:gravity="center"
-      style="@style/TextAppearance.AppCompat.Subhead"
-      tools:text="Centralized App Logging with Fluentd Centralized App Logging with Fluentd"
+      android:orientation="horizontal"
+      android:gravity="center_vertical"
       android:layout_alignParentTop="true"
-      />
+      tools:ignore="UseCompoundDrawables">
 
-  <include layout="@layout/score_by_time" />
+    <ImageView
+        android:layout_width="@dimen/medium_icon_size"
+        android:layout_height="@dimen/medium_icon_size"
+        android:layout_marginRight="@dimen/item_horizontal_padding"
+        android:layout_marginEnd="@dimen/item_horizontal_padding"
+        android:src="@mipmap/story"
+        android:contentDescription="@string/story_type_icon"
+        />
+
+    <TextView
+        android:id="@android:id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        style="@style/AppThemeSubhead"
+        tools:text="Centralized App Logging with Fluentd Centralized App Logging with Fluentd"
+        />
+
+  </LinearLayout>
+
+  <RelativeLayout
+      android:id="@+id/score_by_time"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/title_container"
+      >
+
+    <ImageView
+        android:id="@android:id/button1"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@mipmap/world"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:contentDescription="@string/open_in_browser_description"
+        tools:visibility="visible"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@android:id/button1"
+        android:layout_toStartOf="@android:id/button1"
+        android:layout_centerVertical="true"
+        >
+
+      <RelativeLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          >
+
+        <ImageView
+            android:id="@android:id/icon"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:layout_marginRight="@dimen/item_horizontal_padding"
+            android:layout_marginEnd="@dimen/item_horizontal_padding"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:src="@mipmap/score"
+            android:contentDescription="@string/score_icon_description"
+            />
+
+        <TextView
+            android:id="@android:id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="1,234"
+            android:layout_toRightOf="@android:id/icon"
+            android:layout_toEndOf="@android:id/icon"
+            style="@style/AppThemeCaption"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toRightOf="@android:id/text2"
+            android:layout_toEndOf="@android:id/text2"
+            android:gravity="end"
+            tools:ignore="UseCompoundDrawables">
+
+          <TextView
+              android:id="@android:id/text1"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              tools:text="jg"
+              android:gravity="end"
+              style="@style/AppThemeCaption"
+              />
+
+          <ImageView
+              android:layout_width="@dimen/small_icon_size"
+              android:layout_height="@dimen/small_icon_size"
+              android:layout_marginLeft="@dimen/item_horizontal_padding"
+              android:layout_marginStart="@dimen/item_horizontal_padding"
+              android:src="@mipmap/user"
+              android:contentDescription="@string/user_icon_description"
+              />
+
+        </LinearLayout>
+
+      </RelativeLayout>
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:gravity="end"
+          tools:ignore="UseCompoundDrawables">
+
+        <TextView
+            android:id="@+id/age"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            tools:text="1 minute ago"
+            style="@style/AppThemeCaption"
+            />
+
+        <ImageView
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@mipmap/time"
+            android:layout_marginLeft="@dimen/item_horizontal_padding"
+            android:layout_marginStart="@dimen/item_horizontal_padding"
+            android:contentDescription="@string/age_icon_description"
+            />
+
+      </LinearLayout>
+
+    </LinearLayout>
+
+  </RelativeLayout>
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/score_by_time"
+      android:gravity="center"
+      tools:ignore="UseCompoundDrawables">
+
+    <ImageView
+        android:id="@android:id/icon1"
+        android:layout_width="@dimen/medium_icon_size"
+        android:layout_height="@dimen/medium_icon_size"
+        android:src="@mipmap/comment"
+        android:layout_marginRight="@dimen/item_horizontal_padding"
+        android:layout_marginEnd="@dimen/item_horizontal_padding"
+        android:contentDescription="@string/comment_icon_description"
+        android:visibility="visible"
+        />
+
+    <TextView
+        android:id="@android:id/custom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        style="@style/AppThemeBody1"
+        tools:text="3"
+        />
+
+  </LinearLayout>
 
 </com.xavierlepretre.hackernewsbrowser.StoryView>

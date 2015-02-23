@@ -7,4 +7,10 @@
 
   </style>
 
+  <style name="AppThemeSubhead" parent="TextAppearance.AppCompat.Subhead"/>
+
+  <style name="AppThemeCaption" parent="TextAppearance.AppCompat.Caption"/>
+
+  <style name="AppThemeBody1" parent="TextAppearance.AppCompat.Body1"/>
+
 </resources>

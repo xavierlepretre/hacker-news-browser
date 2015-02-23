@@ -57,6 +57,8 @@ dependencies {
 
 
 //Copy test resources to classpath folder. See https://code.google.com/p/android/issues/detail?id=74443
+// TODO Apparently there is some leakage between modules.
+// TODO avoid having one modules resources files then accessed from another module's tests
 tasks.findByName("assembleDebug").dependsOn("copyTestResources")
 task copyTestResources(type: Copy) {
   from "${projectDir}/src/test/resources"

@@ -1,6 +1,7 @@
 package com.xavierlepretre.hackernewsbrowser;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,66 +13,90 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnItemClick;
+import butterknife.OnItemLongClick;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xavierlepretre.util.ClipboardUtil;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
+import com.ycombinator.news.dto.ParentItemDTO;
+import com.ycombinator.news.dto.ParentKidMap;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
 import com.ycombinator.news.service.HackerNewsService;
+import com.ycombinator.news.service.LoadingItemDTO;
 import java.io.IOException;
+import java.util.List;
+import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.app.AppObservable;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class ViewItemActivity extends ActionBarActivity
 {
     public static final String TRANSITION_KEY_HEADER = ViewItemActivity.class.getName() + ".transitionHeader";
-    private static final String KEY_ITEM_ID = ViewItemActivity.class.getName() + ".itemId";
-    private static final String KEY_ITEM_DTO = ViewItemActivity.class.getName() + ".itemDto";
+    static final String KEY_ITEM_ID = ViewItemActivity.class.getName() + ".itemId";
+    static final String KEY_ITEM_DTO = ViewItemActivity.class.getName() + ".itemDto";
 
     public static void launch(@NonNull Activity activity,
             @NonNull View sharedElement,
             @NonNull ObjectMapper objectMapper,
             @NonNull ItemViewDTO item)
     {
-        Intent viewItemIntent = new Intent(activity, ViewItemActivity.class);
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                activity, sharedElement, ViewItemActivity.TRANSITION_KEY_HEADER);
+        ActivityCompat.startActivity(activity, createLaunchIntent(activity, objectMapper, item), options.toBundle());
+    }
+
+    static Intent createLaunchIntent(@NonNull Context context,
+            @NonNull ObjectMapper objectMapper,
+            @NonNull ItemViewDTO item)
+    {
+        Intent viewItemIntent = new Intent(context, ViewItemActivity.class);
         viewItemIntent.putExtra(KEY_ITEM_ID, item.getItemId().id);
-        if (item instanceof BaseItemViewDTO)
+        if (item instanceof ItemView.DTO)
         {
             try
             {
-                viewItemIntent.putExtra(KEY_ITEM_DTO, objectMapper.writeValueAsString(((BaseItemViewDTO) item).itemDTO));
+                viewItemIntent.putExtra(KEY_ITEM_DTO, objectMapper.writeValueAsString(((ItemView.DTO) item).itemDTO));
             }
             catch (JsonProcessingException e)
             {
-                Log.e("ViewItemActivity", "Failed to serialise " + ((BaseItemViewDTO) item).itemDTO);
+                Log.e("ViewItemActivity", "Failed to serialise " + ((ItemView.DTO) item).itemDTO);
             }
         }
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity, sharedElement, ViewItemActivity.TRANSITION_KEY_HEADER);
-        ActivityCompat.startActivity(activity, viewItemIntent, options.toBundle());
+        return viewItemIntent;
     }
 
     ItemId showingItem;
-    HackerNewsService hackerNewsService;
-    ObjectMapper objectMapper;
+    @NonNull ParentKidMap parentKidMap;
+    @NonNull HackerNewsService hackerNewsService;
+    @NonNull ObjectMapper objectMapper;
 
     @InjectView(R.id.refresh_list) SwipeRefreshLayout pullToRefresh;
     @InjectView(android.R.id.list) ListView listView;
     ItemViewAnimator itemViewAnimator;
+    @NonNull StoryAsIsAdapter commentAdapter;
 
     Subscription fetchItemSubscription;
+    Subscription fetchKidsSubscription;
+    Subscription listenBackParentSubscription;
 
     @Override protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        this.parentKidMap = new ParentKidMap();
         this.hackerNewsService = HackerNewsRestAdapter.createHackerNewsService();
         this.objectMapper = HackerNewsRestAdapter.createHackerNewsMapper();
 
@@ -79,30 +104,38 @@ public class ViewItemActivity extends ActionBarActivity
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         ButterKnife.inject(this);
 
-        itemViewAnimator = (ItemViewAnimator) LayoutInflater.from(this).inflate(R.layout.item_animator, null);
-        this.listView.addHeaderView(itemViewAnimator, null, false);
-
         this.showingItem = new ItemId(getIntent().getIntExtra(KEY_ITEM_ID, 0));
-        ItemViewDTO viewDTO = new LoadingItemViewDTO(
+        ItemViewDTO viewDTO = new LoadingItemView.DTO(
                 getResources(),
                 this.showingItem,
                 true);
-        try
+        String serialised = getIntent().getStringExtra(KEY_ITEM_DTO);
+        if (serialised != null)
         {
-            String serialised = getIntent().getStringExtra(KEY_ITEM_DTO);
-            if (serialised != null)
+            try
             {
                 viewDTO = ItemViewDTOFactory.create(this, objectMapper.readValue(serialised, ItemDTO.class));
+                parentKidMap.put(((ItemView.DTO) viewDTO).itemDTO);
+            }
+            catch (IOException e)
+            {
+                Log.e("ViewItemActivity", "Failed to deserialise: " + getIntent().getStringExtra(KEY_ITEM_DTO));
             }
         }
-        catch (IOException e)
-        {
-            Log.e("ViewItemActivity", "Failed to deserialise: " + getIntent().getStringExtra(KEY_ITEM_DTO));
-        }
+
+        View itemViewAnimatorContainer = LayoutInflater.from(this).inflate(R.layout.item_animator, null);
+        itemViewAnimator = (ItemViewAnimator) (itemViewAnimatorContainer.findViewById(android.R.id.extractArea));
+        this.listView.addHeaderView(
+                itemViewAnimatorContainer,
+                viewDTO,
+                true);
 
         this.itemViewAnimator.displayItem(viewDTO);
         getSupportActionBar().setTitle(ItemViewDTOUtil.getActionBarTitle(getResources(), viewDTO));
 
+        this.commentAdapter = new StoryAsIsAdapter(this);
+        this.commentAdapter.setIds(parentKidMap.flattenPrimoGeniture(showingItem));
+        this.listView.setAdapter(commentAdapter);
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
         {
             @Override public void onRefresh()
@@ -124,11 +157,16 @@ public class ViewItemActivity extends ActionBarActivity
     @Override protected void onStart()
     {
         super.onStart();
+        pullToRefresh.setRefreshing(true);
         fetchItem();
+        fetchKids();
+        listenToBackToParent();
     }
 
     @Override protected void onStop()
     {
+        unsubscribe(listenBackParentSubscription);
+        unsubscribe(fetchKidsSubscription);
         unsubscribe(fetchItemSubscription);
         super.onStop();
     }
@@ -139,19 +177,25 @@ public class ViewItemActivity extends ActionBarActivity
         fetchItemSubscription = AppObservable.bindActivity(
                 this,
                 hackerNewsService.getContent(showingItem)
-                        .map(new Func1<ItemDTO, ItemViewDTO>()
+                        .observeOn(Schedulers.computation())
+                        .map(new Func1<ItemDTO, Pair<List<ItemId>, ItemViewDTO>>()
                         {
-                            @Override public ItemViewDTO call(ItemDTO itemDTO)
+                            @Override public Pair<List<ItemId>, ItemViewDTO> call(ItemDTO itemDTO)
                             {
-                                return ItemViewDTOFactory.create(ViewItemActivity.this, itemDTO);
+                                parentKidMap.put(itemDTO);
+                                ItemViewDTO viewDTO =
+                                        ItemViewDTOFactory.create(ViewItemActivity.this, itemDTO, parentKidMap.getCollapsibleState(itemDTO.getId()));
+                                return Pair.create(parentKidMap.flattenPrimoGeniture(showingItem), viewDTO);
                             }
                         }))
-                .subscribe(new Observer<ItemViewDTO>()
+                .subscribe(new Observer<Pair<List<ItemId>, ItemViewDTO>>()
                 {
-                    @Override public void onNext(ItemViewDTO itemDTO)
+                    @Override public void onNext(Pair<List<ItemId>, ItemViewDTO> viewPair)
                     {
-                        itemViewAnimator.displayItem(itemDTO);
-                        getSupportActionBar().setTitle(ItemViewDTOUtil.getActionBarTitle(getResources(), itemDTO));
+                        pullToRefresh.setRefreshing(false);
+                        itemViewAnimator.displayItem(viewPair.second);
+                        getSupportActionBar().setTitle(ItemViewDTOUtil.getActionBarTitle(getResources(), viewPair.second));
+                        commentAdapter.setIds(viewPair.first);
                     }
 
                     @Override public void onCompleted()
@@ -163,6 +207,131 @@ public class ViewItemActivity extends ActionBarActivity
                         Log.e("ViewItemActivity", "Failed to load main item", e);
                     }
                 });
+    }
+
+    private void fetchKids()
+    {
+        unsubscribe(fetchKidsSubscription);
+        fetchKidsSubscription = AppObservable.bindActivity(
+                this,
+                hackerNewsService.getContentFromIds(commentAdapter.getRequestedIdsObservable())
+                        .observeOn(Schedulers.computation())
+                        .map(new Func1<LoadingItemDTO, Pair<List<ItemId>, ItemViewDTO>>()
+                        {
+                            @Override public Pair<List<ItemId>, ItemViewDTO> call(LoadingItemDTO loadingItemDTO)
+                            {
+                                ItemViewDTO viewDTO = ItemViewDTOFactory.create(ViewItemActivity.this, loadingItemDTO,
+                                        parentKidMap.getCollapsibleState(loadingItemDTO.getItemId()));
+                                if (viewDTO instanceof ItemView.DTO)
+                                {
+                                    parentKidMap.put(((ItemView.DTO) viewDTO).itemDTO);
+                                }
+                                return Pair.create(
+                                        parentKidMap.flattenPrimoGeniture(showingItem),
+                                        viewDTO);
+                            }
+                        }))
+                .subscribe(new Observer<Pair<List<ItemId>, ItemViewDTO>>()
+                {
+                    @Override public void onNext(Pair<List<ItemId>, ItemViewDTO> viewPair)
+                    {
+                        commentAdapter.add(viewPair.second);
+                        commentAdapter.setIds(viewPair.first);
+                    }
+
+                    @Override public void onCompleted()
+                    {
+                    }
+
+                    @Override public void onError(Throwable e)
+                    {
+                        Log.e("ViewItemActivity", "Failed to load kid item", e);
+                    }
+                });
+    }
+
+    private void listenToBackToParent()
+    {
+        unsubscribe(listenBackParentSubscription);
+        listenBackParentSubscription = AppObservable.bindActivity(
+                this,
+                commentAdapter.getBackToParentObservable())
+                .subscribe(new Observer<StoryAsIsAdapter.PositionedItemId>()
+                {
+                    @Override public void onNext(StoryAsIsAdapter.PositionedItemId o)
+                    {
+                        listView.smoothScrollToPosition(o.position + listView.getHeaderViewsCount());
+                    }
+
+                    @Override public void onCompleted()
+                    {
+                    }
+
+                    @Override public void onError(Throwable e)
+                    {
+                        Log.e("ViewItemActivity", "Failed to scroll back to parent", e);
+                    }
+                });
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    @OnItemClick(android.R.id.list) void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    {
+        ItemViewDTO clicked = (ItemViewDTO) parent.getItemAtPosition(position);
+        if (clicked instanceof ItemView.DTO
+                && ((ItemView.DTO) clicked).itemDTO instanceof ParentItemDTO
+                && ((ParentItemDTO) ((ItemView.DTO) clicked).itemDTO).getKids().isEmpty())
+        {
+            Toast.makeText(this, R.string.no_comment_collapse_description, Toast.LENGTH_SHORT).show();
+        }
+        if (clicked.getItemId().equals(showingItem))
+        {
+            Toast.makeText(this, R.string.cannot_collapse_main_comments, Toast.LENGTH_LONG).show();
+        }
+        else
+        {
+            toggleCollapsedState(clicked.getItemId());
+        }
+    }
+
+    public void toggleCollapsedState(@NonNull final ItemId itemId)
+    {
+        AppObservable.bindActivity(this, Observable.just(itemId)
+                .subscribeOn(Schedulers.computation())
+                .map(new Func1<ItemId, List<ItemId>>()
+                {
+                    @Override public List<ItemId> call(ItemId itemId)
+                    {
+                        parentKidMap.toggleCollapsedState(itemId);
+                        return parentKidMap.flattenPrimoGeniture(showingItem);
+                    }
+                }))
+                .subscribe(new Observer<List<ItemId>>()
+                {
+                    @Override public void onNext(List<ItemId> newIds)
+                    {
+                        commentAdapter.toggleCollapsible(itemId);
+                        commentAdapter.setIds(newIds);
+                    }
+
+                    @Override public void onCompleted()
+                    {
+                    }
+
+                    @Override public void onError(Throwable e)
+                    {
+                    }
+                });
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    @OnItemLongClick(android.R.id.list) boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+    {
+        ItemViewDTO viewDTO = (ItemViewDTO) parent.getItemAtPosition(position);
+        String copyable = ItemViewDTOUtil.getCopyableText(viewDTO);
+        ClipboardUtil.copyToClipboard(this, copyable);
+        Toast.makeText(this, getString(R.string.copied_to_clipboard, copyable), Toast.LENGTH_LONG).show();
+        return true;
     }
 
     protected void unsubscribe(@Nullable Subscription subscription)

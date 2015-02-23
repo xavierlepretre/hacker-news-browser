@@ -48,4 +48,28 @@ public class CommentDTOTest
     {
         mapper.readValue(getClass().getResourceAsStream("comment_dto_1_no_text.json"), ItemDTO.class);
     }
+
+    @Test(expected = JsonMappingException.class)
+    public void testFailsOnCommentMissingByButNotDeleted() throws IOException
+    {
+        mapper.readValue(getClass().getResourceAsStream("comment_dto_1_no_by.json"), ItemDTO.class);
+    }
+
+    @Test()
+    public void testOnCommentMissingTextAndDeleted() throws IOException
+    {
+        ItemDTO itemDTO = mapper.readValue(getClass().getResourceAsStream("comment_dto_1_no_text_deleted.json"), ItemDTO.class);
+
+        assertThat(itemDTO).isInstanceOf(CommentDTO.class);
+        CommentDTO commentDTO = (CommentDTO) itemDTO;
+        assertThat(commentDTO.getId()).isEqualTo(new ItemId(2921983));
+        assertThat(commentDTO.getBy()).isEqualTo(new UserId("norvig"));
+        assertThat(commentDTO.getParent()).isEqualTo(new ItemId(2921506));
+        assertThat(commentDTO.getKids().size()).isEqualTo(7);
+        assertThat(commentDTO.getKids().get(3)).isEqualTo(new ItemId(2922709));
+        assertThat(commentDTO.getText()).isEqualTo("deleted");
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        assertThat(dateFormat.format(commentDTO.getTime())).isEqualTo("2011-08-25 02:38:47");
+    }
 }

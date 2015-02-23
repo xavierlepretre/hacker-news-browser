@@ -5,11 +5,13 @@
 
     <item name="colorPrimary">@color/hacker_news_orange</item>
     <item name="colorPrimaryDark">@color/hacker_news_orange_dark</item>
+
     <item name="android:windowNoTitle">true</item>
     <item name="windowActionBar">false</item>
 
     <item name="android:textColorPrimary">@android:color/black</item>
     <item name="android:textColorSecondary">@android:color/darker_gray</item>
+
     <item name="android:windowBackground">@android:color/white</item>
 
     <item name="android:textColor">@android:color/black</item>
@@ -26,5 +28,28 @@
   </style>
 
   <style name="AppTheme.ListItem" parent="AppTheme.ListItem.Base"/>
+
+  <style name="AppTheme.ListItem.Job" parent="AppTheme.ListItem">
+    <!-- Special background? @color/job_item_bg -->
+  </style>
+
+  <style name="AppTheme.ListItem.Unknown" parent="AppTheme.ListItem">
+    <item name="android:background">#ffdddd</item>
+  </style>
+
+  <style name="AppThemeSubhead">
+    <!-- We need to name it like this, and not AppTheme.Subhead, otherwise tests fail on v10 -->
+    <item name="android:textSize">16sp</item>
+  </style>
+
+  <style name="AppThemeCaption">
+    <!-- We need to name it like this, and not AppTheme.Caption, otherwise tests fail on v10 -->
+    <item name="android:textColor">@android:color/darker_gray</item>
+  </style>
+
+  <style name="AppThemeBody1">
+    <!-- We need to name it like this, and not AppTheme.Body1, otherwise tests fail on v10 -->
+    <item name="android:textSize">16sp</item>
+  </style>
 
 </resources>

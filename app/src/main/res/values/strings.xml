@@ -5,9 +5,24 @@
 
   <string name="top_stories_label">Top Stories - Hacker News</string>
 
-  <string name="loading_item_id">Loading item %s</string>
   <string name="scheduled_item_id">Waiting to load item %s</string>
-  <string name="by_author">by %s</string>
-  <string name="score_value">Score: %s</string>
+  <string name="schedule_icon_description">Icon showing that download is scheduled</string>
+  <string name="loading_item_id">Loading item %s</string>
+  <string name="loading_icon_description">Icon showing download is current</string>
+  <string name="story_type_icon">Item of type story</string>
+  <string name="job_type_icon">Item of type job</string>
+  <string name="open_in_browser_description">Click to open in browser</string>
+  <string name="score_icon_description">Score</string>
+  <string name="comment_icon_description">Comment count</string>
+  <string name="user_icon_description">User name</string>
+  <string name="age_icon_description">Age of post</string>
+
+  <string name="cannot_collapse_main_comments">You cannot collapse the main story</string>
+  <string name="no_comment_collapse_description">There is no comment to expand</string>
+  <string name="comment_click_expand">Click to expand comments section</string>
+  <string name="comment_click_collapse">Click to collapse comments section</string>
+  <string name="go_up_to_parent_item_description">Go back to parent item</string>
+
+  <string name="copied_to_clipboard">Copied %s to clipboard</string>
 
 </resources>
