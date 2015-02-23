@@ -60,11 +60,19 @@ public class HackerNewsService
         final ReplaySubject<LoadingItemDTO> subject = ReplaySubject.create();
         final Func1<ItemId, Observable<ItemDTO>> properCall = new Func1<ItemId, Observable<ItemDTO>>()
         {
-            @Override public Observable<ItemDTO> call(ItemId itemId)
+            @Override public Observable<ItemDTO> call(final ItemId itemId)
             {
                 // We need to go one step deeper otherwise the subscriber is overwhelmed
                 subject.onNext(new LoadingItemStartedDTO(itemId));
-                return getContent(itemId);
+                return getContent(itemId)
+                        .onErrorResumeNext(new Func1<Throwable, Observable<? extends ItemDTO>>()
+                        {
+                            @Override public Observable<? extends ItemDTO> call(Throwable throwable)
+                            {
+                                subject.onNext(new LoadingItemFailedDTO(itemId));
+                                return Observable.empty();
+                            }
+                        });
             }
         };
         final Func1<ItemId, Observable<ItemDTO>> preventImmediateCall = new Func1<ItemId, Observable<ItemDTO>>()

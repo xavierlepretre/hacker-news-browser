@@ -78,7 +78,7 @@ public class StoryAsIsAdapter extends BaseAdapter
         {
             if (receivedDtos.get(itemId) == null)
             {
-                receivedDtos.put(itemId, new LoadingItemView.DTO(resources, itemId, false));
+                receivedDtos.put(itemId, new LoadingItemView.DTO(resources, itemId, LoadingItemView.State.SCHEDULED));
             }
         }
         notifyDataSetChanged();

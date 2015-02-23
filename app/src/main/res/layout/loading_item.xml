@@ -12,7 +12,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
 
-    <ViewSwitcher
+    <ViewAnimator
         android:id="@android:id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,7 +34,14 @@
           android:contentDescription="@string/loading_icon_description"
           />
 
-    </ViewSwitcher>
+      <ImageView
+          android:layout_width="24dp"
+          android:layout_height="24dp"
+          android:src="@mipmap/disconnected"
+          android:contentDescription="@string/loading_failed_icon_description"
+          />
+
+    </ViewAnimator>
 
     <TextView
         android:id="@android:id/title"

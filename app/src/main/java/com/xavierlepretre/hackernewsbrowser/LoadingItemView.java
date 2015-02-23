@@ -4,10 +4,11 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
+import android.widget.ViewAnimator;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.ycombinator.news.dto.ItemId;
@@ -15,14 +16,8 @@ import java.text.NumberFormat;
 
 public class LoadingItemView extends RelativeLayout
 {
-    private static final int LOADING_VIEW_CHILD_SCHEDULED = 0;
-    private static final int LOADING_VIEW_CHILD_LOADING = 1;
-
-    @ColorRes private static final int SCHEDULED_BG_COLOR_RES = android.R.color.transparent;
-    @ColorRes private static final int LOADING_BG_COLOR_RES = R.color.loading_item_bg;
-
     @InjectView(android.R.id.title) TextView title;
-    @InjectView(android.R.id.progress) ViewSwitcher progressSwitcher;
+    @InjectView(android.R.id.progress) ViewAnimator progressSwitcher;
 
     public LoadingItemView(Context context)
     {
@@ -48,7 +43,7 @@ public class LoadingItemView extends RelativeLayout
     public void displayItem(@NonNull DTO item)
     {
         title.setText(item.title);
-        progressSwitcher.setDisplayedChild(item.progressChildId);
+        progressSwitcher.setDisplayedChild(item.state.childId);
         setBackgroundColor(item.bgColor);
     }
 
@@ -56,24 +51,40 @@ public class LoadingItemView extends RelativeLayout
     {
         @NonNull final ItemId itemId;
         @NonNull final String title;
-        final int progressChildId;
         final int bgColor;
-        final boolean loading;
+        final State state;
 
-        DTO(@NonNull Resources resources, @NonNull ItemId itemId, boolean loading)
+        DTO(@NonNull Resources resources, @NonNull ItemId itemId, State state)
         {
             this.itemId = itemId;
             this.title = resources.getString(
-                    loading ? R.string.loading_item_id : R.string.scheduled_item_id,
+                    state.titleRes,
                     NumberFormat.getIntegerInstance().format(itemId.id));
-            this.progressChildId = loading ? LOADING_VIEW_CHILD_LOADING : LOADING_VIEW_CHILD_SCHEDULED;
-            this.bgColor = resources.getColor(loading ? LOADING_BG_COLOR_RES : SCHEDULED_BG_COLOR_RES);
-            this.loading = loading;
+            this.bgColor = resources.getColor(state.bgColorRes);
+            this.state = state;
         }
 
         @NonNull @Override public ItemId getItemId()
         {
             return itemId;
+        }
+    }
+
+    public static enum State
+    {
+        SCHEDULED(0, android.R.color.transparent, R.string.scheduled_item_id),
+        LOADING(1, R.color.loading_item_bg, R.string.loading_item_id),
+        FAILED(2, R.color.loading_failed_item_bg, R.string.loading_failed_item_id);
+
+        private final int childId;
+        @ColorRes private final int bgColorRes;
+        @StringRes private final int titleRes;
+
+        private State(int childId, @ColorRes int bgColorRes, @StringRes int titleRes)
+        {
+            this.childId = childId;
+            this.bgColorRes = bgColorRes;
+            this.titleRes = titleRes;
         }
     }
 }

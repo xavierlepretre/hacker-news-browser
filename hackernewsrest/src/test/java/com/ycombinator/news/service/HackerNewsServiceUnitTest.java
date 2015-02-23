@@ -364,4 +364,80 @@ public class HackerNewsServiceUnitTest
 
         assertThat(iterator.hasNext()).isFalse();
     }
+
+    @Test public void testContentIterableCanNotifyFailed() throws InterruptedException
+    {
+        final CountDownLatch signal = new CountDownLatch(1);
+        when(serviceRetrofit.getContent(anyString(), anyInt())).then(new Answer<Object>()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
+                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                signal.countDown();
+                return Observable.error(new Throwable());
+            }
+        });
+
+        Iterator<LoadingItemDTO> iterator = service.getContent(Arrays.asList(new ItemId(478))).toBlocking().getIterator();
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(0);
+
+        assertThat(iterator.hasNext()).isTrue();
+        LoadingItemDTO dto = iterator.next();
+        assertThat(dto).isExactlyInstanceOf(LoadingItemStartedDTO.class);
+        assertThat(dto.getItemId()).isEqualTo(new ItemId(478));
+
+        assertThat(iterator.hasNext()).isTrue();
+        dto = iterator.next();
+        assertThat(dto).isExactlyInstanceOf(LoadingItemFailedDTO.class);
+        assertThat(dto.getItemId()).isEqualTo(new ItemId(478));
+
+        assertThat(iterator.hasNext()).isFalse();
+    }
+
+    @Test public void testContentIterableCanNotifyFailedWithoutStoppingSubsequent() throws InterruptedException
+    {
+        final CountDownLatch signal = new CountDownLatch(2);
+        when(serviceRetrofit.getContent(anyString(), anyInt())).then(new Answer<Object>()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
+                assertThat((Integer) invocation.getArguments()[1]).isIn(478, 479);
+                signal.countDown();
+                if (invocation.getArguments()[1].equals(478))
+                {
+                    return Observable.error(new Throwable());
+                }
+                return Observable.just(mockItemDTO(new ItemId((Integer) invocation.getArguments()[1])));
+            }
+        });
+
+        Iterator<LoadingItemDTO> iterator = service.getContent(Arrays.asList(new ItemId(478), new ItemId(479))).toBlocking().getIterator();
+        signal.await(1, TimeUnit.SECONDS);
+        assertThat(signal.getCount()).isEqualTo(0);
+
+        assertThat(iterator.hasNext()).isTrue();
+        LoadingItemDTO dto = iterator.next();
+        assertThat(dto).isExactlyInstanceOf(LoadingItemStartedDTO.class);
+        assertThat(dto.getItemId()).isEqualTo(new ItemId(478));
+
+        assertThat(iterator.hasNext()).isTrue();
+        dto = iterator.next();
+        assertThat(dto).isExactlyInstanceOf(LoadingItemFailedDTO.class);
+        assertThat(dto.getItemId()).isEqualTo(new ItemId(478));
+
+        assertThat(iterator.hasNext()).isTrue();
+        dto = iterator.next();
+        assertThat(dto).isExactlyInstanceOf(LoadingItemStartedDTO.class);
+        assertThat(dto.getItemId()).isEqualTo(new ItemId(479));
+
+        assertThat(iterator.hasNext()).isTrue();
+        dto = iterator.next();
+        assertThat(dto).isExactlyInstanceOf(LoadingItemFinishedDTO.class);
+        assertThat(dto.getItemId()).isEqualTo(new ItemId(479));
+
+        assertThat(iterator.hasNext()).isFalse();
+    }
 }

@@ -9,6 +9,7 @@ import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.JobDTO;
 import com.ycombinator.news.dto.StoryDTO;
 import com.ycombinator.news.service.LoadingItemDTO;
+import com.ycombinator.news.service.LoadingItemFailedDTO;
 import com.ycombinator.news.service.LoadingItemFinishedDTO;
 import com.ycombinator.news.service.LoadingItemStartedDTO;
 import java.util.ArrayList;
@@ -30,7 +31,11 @@ public class ItemViewDTOFactory
         }
         else if (loadingItemDTO instanceof LoadingItemStartedDTO)
         {
-            created = new LoadingItemView.DTO(context.getResources(), ((LoadingItemStartedDTO) loadingItemDTO).itemId, true);
+            created = new LoadingItemView.DTO(context.getResources(), loadingItemDTO.getItemId(), LoadingItemView.State.LOADING);
+        }
+        else if (loadingItemDTO instanceof LoadingItemFailedDTO)
+        {
+            created = new LoadingItemView.DTO(context.getResources(), loadingItemDTO.getItemId(), LoadingItemView.State.FAILED);
         }
         else
         {

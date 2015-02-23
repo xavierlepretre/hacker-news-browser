@@ -35,6 +35,7 @@ import com.ycombinator.news.service.HackerNewsRestAdapter;
 import com.ycombinator.news.service.HackerNewsService;
 import com.ycombinator.news.service.LoadingItemDTO;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.Observer;
@@ -42,6 +43,7 @@ import rx.Subscription;
 import rx.android.app.AppObservable;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import rx.subjects.BehaviorSubject;
 
 public class ViewItemActivity extends ActionBarActivity
 {
@@ -83,6 +85,7 @@ public class ViewItemActivity extends ActionBarActivity
     @NonNull ParentKidMap parentKidMap;
     @NonNull HackerNewsService hackerNewsService;
     @NonNull ObjectMapper objectMapper;
+    @NonNull BehaviorSubject<ItemId> requiredIdsSubject;
 
     @InjectView(R.id.refresh_list) SwipeRefreshLayout pullToRefresh;
     @InjectView(android.R.id.list) ListView listView;
@@ -91,6 +94,7 @@ public class ViewItemActivity extends ActionBarActivity
 
     Subscription fetchItemSubscription;
     Subscription fetchKidsSubscription;
+    Subscription listenRequiredSubscription;
     Subscription listenBackParentSubscription;
 
     @Override protected void onCreate(Bundle savedInstanceState)
@@ -99,6 +103,7 @@ public class ViewItemActivity extends ActionBarActivity
         this.parentKidMap = new ParentKidMap();
         this.hackerNewsService = HackerNewsRestAdapter.createHackerNewsService();
         this.objectMapper = HackerNewsRestAdapter.createHackerNewsMapper();
+        this.requiredIdsSubject = BehaviorSubject.create();
 
         setContentView(R.layout.activity_view_item);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
@@ -108,7 +113,7 @@ public class ViewItemActivity extends ActionBarActivity
         ItemViewDTO viewDTO = new LoadingItemView.DTO(
                 getResources(),
                 this.showingItem,
-                true);
+                LoadingItemView.State.LOADING);
         String serialised = getIntent().getStringExtra(KEY_ITEM_DTO);
         if (serialised != null)
         {
@@ -160,12 +165,14 @@ public class ViewItemActivity extends ActionBarActivity
         pullToRefresh.setRefreshing(true);
         fetchItem();
         fetchKids();
+        listenToRequiredIds();
         listenToBackToParent();
     }
 
     @Override protected void onStop()
     {
         unsubscribe(listenBackParentSubscription);
+        unsubscribe(listenRequiredSubscription);
         unsubscribe(fetchKidsSubscription);
         unsubscribe(fetchItemSubscription);
         super.onStop();
@@ -186,6 +193,14 @@ public class ViewItemActivity extends ActionBarActivity
                                 ItemViewDTO viewDTO =
                                         ItemViewDTOFactory.create(ViewItemActivity.this, itemDTO, parentKidMap.getCollapsibleState(itemDTO.getId()));
                                 return Pair.create(parentKidMap.flattenPrimoGeniture(showingItem), viewDTO);
+                            }
+                        })
+                        .onErrorResumeNext(new Func1<Throwable, Observable<? extends Pair<List<ItemId>, ItemViewDTO>>>()
+                        {
+                            @Override public Observable<? extends Pair<List<ItemId>, ItemViewDTO>> call(Throwable throwable)
+                            {
+                                return Observable.just(Pair.create((List<ItemId>) new ArrayList<ItemId>(),
+                                        (ItemViewDTO) new LoadingItemView.DTO(getResources(), showingItem, LoadingItemView.State.FAILED)));
                             }
                         }))
                 .subscribe(new Observer<Pair<List<ItemId>, ItemViewDTO>>()
@@ -214,7 +229,7 @@ public class ViewItemActivity extends ActionBarActivity
         unsubscribe(fetchKidsSubscription);
         fetchKidsSubscription = AppObservable.bindActivity(
                 this,
-                hackerNewsService.getContentFromIds(commentAdapter.getRequestedIdsObservable())
+                hackerNewsService.getContentFromIds(requiredIdsSubject)
                         .observeOn(Schedulers.computation())
                         .map(new Func1<LoadingItemDTO, Pair<List<ItemId>, ItemViewDTO>>()
                         {
@@ -248,6 +263,15 @@ public class ViewItemActivity extends ActionBarActivity
                         Log.e("ViewItemActivity", "Failed to load kid item", e);
                     }
                 });
+    }
+
+    private void listenToRequiredIds()
+    {
+        unsubscribe(listenRequiredSubscription);
+        listenRequiredSubscription = AppObservable.bindActivity(
+                this,
+                commentAdapter.getRequestedIdsObservable())
+                .subscribe(requiredIdsSubject);
     }
 
     private void listenToBackToParent()
@@ -284,7 +308,13 @@ public class ViewItemActivity extends ActionBarActivity
         {
             Toast.makeText(this, R.string.no_comment_collapse_description, Toast.LENGTH_SHORT).show();
         }
-        if (clicked.getItemId().equals(showingItem))
+        else if (clicked instanceof LoadingItemView.DTO)
+        {
+            Toast.makeText(this, R.string.retry_download, Toast.LENGTH_SHORT).show();
+            requiredIdsSubject.onNext(clicked.getItemId());
+        }
+
+        if (clicked.getItemId().equals(showingItem) && !(clicked instanceof LoadingItemView.DTO))
         {
             Toast.makeText(this, R.string.cannot_collapse_main_comments, Toast.LENGTH_LONG).show();
         }

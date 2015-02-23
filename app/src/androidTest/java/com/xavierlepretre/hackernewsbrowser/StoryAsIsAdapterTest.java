@@ -263,7 +263,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testSetIdsMeansScheduled()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        assertThat(((LoadingItemView.DTO) adapter.getItem(0)).loading).isFalse();
+        assertThat(((LoadingItemView.DTO) adapter.getItem(0)).state).isEqualTo(LoadingItemView.State.SCHEDULED);
     }
 
     @SmallTest
@@ -271,7 +271,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
         adapter.add(new JobView.DTO(getContext(), new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 32, "text")));
-        adapter.add(new LoadingItemView.DTO(getContext().getResources(), new ItemId(1), true));
+        adapter.add(new LoadingItemView.DTO(getContext().getResources(), new ItemId(1), LoadingItemView.State.LOADING));
         assertThat(adapter.getItem(0)).isExactlyInstanceOf(JobView.DTO.class);
     }
 
@@ -295,7 +295,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testScheduledViewDtoAndGetItemRequestsOnItemId() throws InterruptedException
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new LoadingItemView.DTO(getContext().getResources(), new ItemId(1), false));
+        adapter.add(new LoadingItemView.DTO(getContext().getResources(), new ItemId(1), LoadingItemView.State.SCHEDULED));
         final CountDownLatch signal = new CountDownLatch(1);
         adapter.getRequestedIdsObservable().subscribe(new Action1<ItemId>()
         {
@@ -313,7 +313,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testLoadingViewDtoAndGetItemRequestsOnItemId() throws InterruptedException
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new LoadingItemView.DTO(getContext().getResources(), new ItemId(1), true));
+        adapter.add(new LoadingItemView.DTO(getContext().getResources(), new ItemId(1), LoadingItemView.State.LOADING));
         final CountDownLatch signal = new CountDownLatch(1);
         adapter.getRequestedIdsObservable().subscribe(new Action1<ItemId>()
         {

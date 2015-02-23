@@ -28,7 +28,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                 new OpenLoadingItemStartedDTO(
                         new ItemId(1)));
         assertThat(itemViewDTO).isExactlyInstanceOf(LoadingItemView.DTO.class);
-        assertThat(((LoadingItemView.DTO) itemViewDTO).loading).isTrue();
+        assertThat(((LoadingItemView.DTO) itemViewDTO).state).isEqualTo(LoadingItemView.State.LOADING);
     }
 
     @SmallTest

@@ -35,7 +35,7 @@ public class LoadingItemViewTest extends AndroidTestCase
         view.displayItem(new LoadingItemView.DTO(
                 getContext().getResources(),
                 new ItemId(15711),
-                true));
+                LoadingItemView.State.LOADING));
         assertThat(view.title.getText().toString()).containsIgnoringCase("Loading");
         assertThat(view.title.getText().toString()).contains("15,711");
     }
@@ -46,8 +46,19 @@ public class LoadingItemViewTest extends AndroidTestCase
         view.displayItem(new LoadingItemView.DTO(
                 getContext().getResources(),
                 new ItemId(15711),
-                false));
+                LoadingItemView.State.SCHEDULED));
         assertThat(view.title.getText().toString()).containsIgnoringCase("Waiting");
+        assertThat(view.title.getText().toString()).contains("15,711");
+    }
+
+    @SmallTest
+    public void testFieldsPopulatedFailed()
+    {
+        view.displayItem(new LoadingItemView.DTO(
+                getContext().getResources(),
+                new ItemId(15711),
+                LoadingItemView.State.FAILED));
+        assertThat(view.title.getText().toString()).containsIgnoringCase("Failed");
         assertThat(view.title.getText().toString()).contains("15,711");
     }
 }

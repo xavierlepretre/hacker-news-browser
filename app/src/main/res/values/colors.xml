@@ -6,5 +6,6 @@
 
   <color name="job_item_bg">#CEDEDD</color>
   <color name="loading_item_bg">#FFBB55</color>
+  <color name="loading_failed_item_bg">#CCCCCC</color>
 
 </resources>
