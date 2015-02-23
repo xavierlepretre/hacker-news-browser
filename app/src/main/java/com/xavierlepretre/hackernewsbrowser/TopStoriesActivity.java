@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ViewAnimator;
+import android.widget.ViewSwitcher;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
@@ -37,6 +39,9 @@ public class TopStoriesActivity extends ActionBarActivity
     private final static String KEY_IDS = TopStoriesActivity.class.getName() + ".ids";
     private final static String KEY_DTOS = TopStoriesActivity.class.getName() + ".dtos";
 
+    private final static int CHILD_INDEX_LOADING = 0;
+    private final static int CHILD_INDEX_LIST = 1;
+
     HackerNewsService hackerNewsService;
     StoryAsIsAdapter adapter;
     ObjectMapper objectMapper;
@@ -45,6 +50,7 @@ public class TopStoriesActivity extends ActionBarActivity
     Subscription topStoriesSubscription;
 
     @InjectView(R.id.refresh_list) SwipeRefreshLayout pullToRefresh;
+    @InjectView(R.id.switcher) ViewSwitcher switcher;
     @InjectView(android.R.id.list) ListView listView;
 
     @Override
@@ -73,6 +79,7 @@ public class TopStoriesActivity extends ActionBarActivity
                 if (savedInstanceState.containsKey(KEY_IDS))
                 {
                     this.adapter.setIds(objectMapper.readValue(savedInstanceState.getString(KEY_IDS), ItemIdList.class));
+                    switcher.setDisplayedChild(CHILD_INDEX_LIST);
                 }
             }
             catch (IOException e)
@@ -205,6 +212,7 @@ public class TopStoriesActivity extends ActionBarActivity
                             @Override public Observable<LoadingItemDTO> call(List<ItemId> itemIds)
                             {
                                 adapter.setIds(itemIds);
+                                switcher.setDisplayedChild(CHILD_INDEX_LIST);
                                 pullToRefresh.setRefreshing(false);
                                 return hackerNewsService.getContentFromIds(adapter.getRequestedIdsObservable());
                             }

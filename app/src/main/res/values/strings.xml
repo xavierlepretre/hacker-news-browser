@@ -5,6 +5,7 @@
 
   <string name="top_stories_label">Top Stories - Hacker News</string>
 
+  <string name="loading_top_stories">Fetching Top Stories…</string>
   <string name="scheduled_item_id">Waiting to load item %s</string>
   <string name="schedule_icon_description">Icon showing that download is scheduled</string>
   <string name="loading_item_id">Loading item %s</string>
