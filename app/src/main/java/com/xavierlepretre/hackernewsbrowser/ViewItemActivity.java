@@ -13,7 +13,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -27,6 +26,7 @@ import butterknife.OnItemLongClick;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xavierlepretre.util.ClipboardUtil;
+import com.ycombinator.news.cache.QuickCache;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.ParentItemDTO;
@@ -34,6 +34,7 @@ import com.ycombinator.news.dto.ParentKidMap;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
 import com.ycombinator.news.service.HackerNewsService;
 import com.ycombinator.news.service.LoadingItemDTO;
+import com.ycombinator.news.service.LoadingItemFinishedDTO;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.app.AppObservable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
@@ -110,10 +112,7 @@ public class ViewItemActivity extends ActionBarActivity
         ButterKnife.inject(this);
 
         this.showingItem = new ItemId(getIntent().getIntExtra(KEY_ITEM_ID, 0));
-        ItemViewDTO viewDTO = new LoadingItemView.DTO(
-                getResources(),
-                this.showingItem,
-                LoadingItemView.State.LOADING);
+        ItemViewDTO viewDTO = null;
         String serialised = getIntent().getStringExtra(KEY_ITEM_DTO);
         if (serialised != null)
         {
@@ -125,6 +124,23 @@ public class ViewItemActivity extends ActionBarActivity
             catch (IOException e)
             {
                 Log.e("ViewItemActivity", "Failed to deserialise: " + getIntent().getStringExtra(KEY_ITEM_DTO));
+            }
+        }
+
+        if (viewDTO == null)
+        {
+            ItemDTO cached = QuickCache.Instance.get().get(showingItem);
+            if (cached != null)
+            {
+                viewDTO = ItemViewDTOFactory.create(this, cached);
+                parentKidMap.put(cached);
+            }
+            else
+            {
+                viewDTO = new LoadingItemView.DTO(
+                        getResources(),
+                        this.showingItem,
+                        LoadingItemView.State.LOADING);
             }
         }
 
@@ -185,32 +201,32 @@ public class ViewItemActivity extends ActionBarActivity
                 this,
                 hackerNewsService.getContent(showingItem)
                         .observeOn(Schedulers.computation())
-                        .map(new Func1<ItemDTO, Pair<List<ItemId>, ItemViewDTO>>()
+                        .map(new Func1<ItemDTO, CommentAdapterUpdate>()
                         {
-                            @Override public Pair<List<ItemId>, ItemViewDTO> call(ItemDTO itemDTO)
+                            @Override public CommentAdapterUpdate call(ItemDTO itemDTO)
                             {
                                 parentKidMap.put(itemDTO);
-                                ItemViewDTO viewDTO =
-                                        ItemViewDTOFactory.create(ViewItemActivity.this, itemDTO, parentKidMap.getCollapsibleState(itemDTO.getId()));
-                                return Pair.create(parentKidMap.flattenPrimoGeniture(showingItem), viewDTO);
+                                return createUpdate(itemDTO);
                             }
                         })
-                        .onErrorResumeNext(new Func1<Throwable, Observable<? extends Pair<List<ItemId>, ItemViewDTO>>>()
+                        .onErrorResumeNext(new Func1<Throwable, Observable<? extends CommentAdapterUpdate>>()
                         {
-                            @Override public Observable<? extends Pair<List<ItemId>, ItemViewDTO>> call(Throwable throwable)
+                            @Override public Observable<? extends CommentAdapterUpdate> call(Throwable throwable)
                             {
-                                return Observable.just(Pair.create((List<ItemId>) new ArrayList<ItemId>(),
-                                        (ItemViewDTO) new LoadingItemView.DTO(getResources(), showingItem, LoadingItemView.State.FAILED)));
+                                return Observable.just(
+                                        new CommentAdapterUpdate(
+                                                new ArrayList<ItemId>(),
+                                                new LoadingItemView.DTO(getResources(), showingItem, LoadingItemView.State.FAILED)));
                             }
                         }))
-                .subscribe(new Observer<Pair<List<ItemId>, ItemViewDTO>>()
+                .subscribe(new Observer<CommentAdapterUpdate>()
                 {
-                    @Override public void onNext(Pair<List<ItemId>, ItemViewDTO> viewPair)
+                    @Override public void onNext(CommentAdapterUpdate update)
                     {
                         pullToRefresh.setRefreshing(false);
-                        itemViewAnimator.displayItem(viewPair.second);
-                        getSupportActionBar().setTitle(ItemViewDTOUtil.getActionBarTitle(getResources(), viewPair.second));
-                        commentAdapter.setIds(viewPair.first);
+                        itemViewAnimator.displayItem(update.dto);
+                        getSupportActionBar().setTitle(ItemViewDTOUtil.getActionBarTitle(getResources(), update.dto));
+                        commentAdapter.setIds(update.itemIds);
                     }
 
                     @Override public void onCompleted()
@@ -231,27 +247,23 @@ public class ViewItemActivity extends ActionBarActivity
                 this,
                 hackerNewsService.getContentFromIds(requiredIdsSubject)
                         .observeOn(Schedulers.computation())
-                        .map(new Func1<LoadingItemDTO, Pair<List<ItemId>, ItemViewDTO>>()
+                        .map(new Func1<LoadingItemDTO, CommentAdapterUpdate>()
                         {
-                            @Override public Pair<List<ItemId>, ItemViewDTO> call(LoadingItemDTO loadingItemDTO)
+                            @Override public CommentAdapterUpdate call(LoadingItemDTO loadingItemDTO)
                             {
-                                ItemViewDTO viewDTO = ItemViewDTOFactory.create(ViewItemActivity.this, loadingItemDTO,
-                                        parentKidMap.getCollapsibleState(loadingItemDTO.getItemId()));
-                                if (viewDTO instanceof ItemView.DTO)
+                                if (loadingItemDTO instanceof LoadingItemFinishedDTO)
                                 {
-                                    parentKidMap.put(((ItemView.DTO) viewDTO).itemDTO);
+                                    parentKidMap.put(((LoadingItemFinishedDTO) loadingItemDTO).itemDTO);
                                 }
-                                return Pair.create(
-                                        parentKidMap.flattenPrimoGeniture(showingItem),
-                                        viewDTO);
+                                return createUpdate(loadingItemDTO);
                             }
                         }))
-                .subscribe(new Observer<Pair<List<ItemId>, ItemViewDTO>>()
+                .subscribe(new Observer<CommentAdapterUpdate>()
                 {
-                    @Override public void onNext(Pair<List<ItemId>, ItemViewDTO> viewPair)
+                    @Override public void onNext(CommentAdapterUpdate update)
                     {
-                        commentAdapter.add(viewPair.second);
-                        commentAdapter.setIds(viewPair.first);
+                        commentAdapter.add(update.dto);
+                        commentAdapter.setIds(update.itemIds);
                     }
 
                     @Override public void onCompleted()
@@ -270,8 +282,64 @@ public class ViewItemActivity extends ActionBarActivity
         unsubscribe(listenRequiredSubscription);
         listenRequiredSubscription = AppObservable.bindActivity(
                 this,
-                commentAdapter.getRequestedIdsObservable())
+                commentAdapter.getRequestedIdsObservable()
+                        .observeOn(Schedulers.computation())
+                        .flatMap(new Func1<ItemId, Observable<ItemId>>()
+                        {
+                            @Override public Observable<ItemId> call(final ItemId itemId)
+                            {
+                                // Calling the cache away from the main thread
+                                final ItemDTO cached = QuickCache.Instance.get().get(itemId);
+                                if (cached != null)
+                                {
+                                    return Observable.just(cached)
+                                            .map(new Func1<ItemDTO, CommentAdapterUpdate>()
+                                            {
+                                                @Override public CommentAdapterUpdate call(ItemDTO itemDTO)
+                                                {
+                                                    parentKidMap.put(cached);
+                                                    return createUpdate(itemDTO);
+                                                }
+                                            })
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .map(new Func1<CommentAdapterUpdate, ItemId>()
+                                            {
+                                                @Override public ItemId call(CommentAdapterUpdate update)
+                                                {
+                                                    commentAdapter.add(update.dto);
+                                                    commentAdapter.setIds(update.itemIds);
+                                                    return itemId;
+                                                }
+                                            });
+                                }
+                                else
+                                {
+                                    return Observable.just(itemId);
+                                }
+                            }
+                        }))
                 .subscribe(requiredIdsSubject);
+    }
+
+    @NonNull CommentAdapterUpdate createUpdate(@NonNull LoadingItemDTO loadingItemDTO)
+    {
+        return createUpdate(ItemViewDTOFactory.create(
+                this,
+                loadingItemDTO,
+                parentKidMap.getCollapsibleState(loadingItemDTO.getItemId())));
+    }
+
+    @NonNull CommentAdapterUpdate createUpdate(@NonNull ItemDTO itemDTO)
+    {
+        return createUpdate(ItemViewDTOFactory.create(
+                this,
+                itemDTO,
+                parentKidMap.getCollapsibleState(itemDTO.getId())));
+    }
+
+    @NonNull CommentAdapterUpdate createUpdate(@NonNull ItemViewDTO viewDTO)
+    {
+        return new CommentAdapterUpdate(parentKidMap.flattenPrimoGeniture(showingItem), viewDTO);
     }
 
     private void listenToBackToParent()
@@ -369,6 +437,18 @@ public class ViewItemActivity extends ActionBarActivity
         if (subscription != null)
         {
             subscription.unsubscribe();
+        }
+    }
+
+    static class CommentAdapterUpdate
+    {
+        @NonNull final List<ItemId> itemIds;
+        @NonNull final ItemViewDTO dto;
+
+        CommentAdapterUpdate(@NonNull List<ItemId> itemIds, @NonNull ItemViewDTO dto)
+        {
+            this.itemIds = itemIds;
+            this.dto = dto;
         }
     }
 }

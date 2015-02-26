@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xavierlepretre.hackernewsrest.BuildConfig;
+import com.ycombinator.news.cache.QuickCache;
 import com.ycombinator.news.dto.HackerNewsDeserialisingModule;
 import retrofit.RestAdapter;
 import retrofit.converter.JacksonConverter;
@@ -14,7 +15,8 @@ public class HackerNewsRestAdapter
     {
         return new HackerNewsService(
                 createHackerNewsServiceRetrofit(),
-                HackerNewsConstants.version);
+                HackerNewsConstants.version,
+                QuickCache.Instance.get());
     }
 
     @NonNull static HackerNewsServiceRetrofit createHackerNewsServiceRetrofit()

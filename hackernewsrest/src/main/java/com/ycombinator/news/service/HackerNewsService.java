@@ -1,6 +1,7 @@
 package com.ycombinator.news.service;
 
 import android.support.annotation.NonNull;
+import com.ycombinator.news.cache.QuickCache;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.UpdateDTO;
@@ -8,6 +9,7 @@ import com.ycombinator.news.dto.UserDTO;
 import com.ycombinator.news.dto.UserId;
 import java.util.List;
 import rx.Observable;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.subjects.ReplaySubject;
 
@@ -17,12 +19,15 @@ public class HackerNewsService
 
     @NonNull private final HackerNewsServiceRetrofit service;
     @NonNull private final ApiVersion version;
+    @NonNull private final QuickCache quickCache;
 
     public HackerNewsService(@NonNull HackerNewsServiceRetrofit service,
-            @NonNull ApiVersion version)
+            @NonNull ApiVersion version,
+            @NonNull QuickCache quickCache)
     {
         this.service = service;
         this.version = version;
+        this.quickCache = quickCache;
     }
 
     @NonNull public Observable<List<ItemId>> getTopStories()
@@ -35,9 +40,28 @@ public class HackerNewsService
         return service.getMaxItemId(version.id);
     }
 
-    @NonNull public Observable<ItemDTO> getContent(@NonNull ItemId itemId)
+    @NonNull public Observable<ItemDTO> getContent(@NonNull final ItemId itemId)
     {
-        return service.getContent(version.id, itemId.id);
+        return service.getContent(version.id, itemId.id)
+                .doOnNext(new Action1<ItemDTO>()
+                {
+                    @Override public void call(ItemDTO itemDTO)
+                    {
+                        quickCache.put(itemDTO);
+                    }
+                })
+                .onErrorResumeNext(new Func1<Throwable, Observable<? extends ItemDTO>>()
+                {
+                    @Override public Observable<? extends ItemDTO> call(Throwable throwable)
+                    {
+                        ItemDTO cached = quickCache.get(itemId);
+                        if (cached != null)
+                        {
+                            return Observable.just(cached);
+                        }
+                        return Observable.error(throwable);
+                    }
+                });
     }
 
     @NonNull public Observable<LoadingItemDTO> getContent(@NonNull Iterable<? extends ItemId> itemIds)

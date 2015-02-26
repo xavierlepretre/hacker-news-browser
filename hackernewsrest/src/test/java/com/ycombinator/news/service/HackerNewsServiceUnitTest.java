@@ -1,6 +1,7 @@
 package com.ycombinator.news.service;
 
 import android.support.annotation.NonNull;
+import com.ycombinator.news.cache.QuickCache;
 import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.UserId;
@@ -14,12 +15,14 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import rx.Observable;
+import rx.functions.Action1;
 import rx.internal.util.SubscriptionList;
 import rx.subjects.BehaviorSubject;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,12 +30,14 @@ public class HackerNewsServiceUnitTest
 {
     private HackerNewsServiceRetrofit serviceRetrofit;
     private HackerNewsService service;
+    private QuickCache quickCache;
     private SubscriptionList subscriptionList;
 
     @Before public void setUp()
     {
         serviceRetrofit = mock(HackerNewsServiceRetrofit.class);
-        service = new HackerNewsService(serviceRetrofit, new ApiVersion("fakeVersion"));
+        quickCache = mock(QuickCache.class);
+        service = new HackerNewsService(serviceRetrofit, new ApiVersion("fakeVersion"), quickCache);
         subscriptionList = new SubscriptionList();
     }
 
@@ -40,6 +45,7 @@ public class HackerNewsServiceUnitTest
     {
         subscriptionList.unsubscribe();
         service = null;
+        quickCache = null;
         serviceRetrofit = null;
     }
 
@@ -106,6 +112,116 @@ public class HackerNewsServiceUnitTest
         subscriptionList.add(service.getContent(new ItemId(478)).subscribe());
         signal.await(1, TimeUnit.SECONDS);
         assertThat(signal.getCount()).isEqualTo(0);
+    }
+
+    @Test public void testContentOnePutsIntoCache() throws InterruptedException
+    {
+        final ItemDTO mocked = mockItemDTO(new ItemId(478));
+
+        final CountDownLatch cacheSignal = new CountDownLatch(1);
+        doAnswer(new Answer()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                cacheSignal.countDown();
+                return null;
+            }
+        }).when(quickCache).put(mocked);
+        final CountDownLatch serviceSignal = new CountDownLatch(1);
+        when(serviceRetrofit.getContent(anyString(), anyInt())).then(new Answer<Object>()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
+                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                serviceSignal.countDown();
+                return Observable.just(mocked);
+            }
+        });
+        subscriptionList.add(service.getContent(new ItemId(478)).subscribe());
+        serviceSignal.await(1, TimeUnit.SECONDS);
+        assertThat(serviceSignal.getCount()).isEqualTo(0);
+        cacheSignal.await(1, TimeUnit.SECONDS);
+        assertThat(cacheSignal.getCount()).isEqualTo(0);
+    }
+
+    @Test public void testContentOneTakesFromCacheIfFailed() throws InterruptedException
+    {
+        final ItemDTO mocked = mockItemDTO(new ItemId(478));
+        final CountDownLatch cacheSignal = new CountDownLatch(1);
+        when(quickCache.get(new ItemId(478))).then(new Answer<Object>()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                cacheSignal.countDown();
+                return mocked;
+            }
+        });
+
+        final CountDownLatch serviceSignal = new CountDownLatch(1);
+        when(serviceRetrofit.getContent(anyString(), anyInt())).then(new Answer<Object>()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
+                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                serviceSignal.countDown();
+                return Observable.just(new Throwable());
+            }
+        });
+        Iterator<ItemDTO> iterator = service.getContent(new ItemId(478)).toBlocking().getIterator();
+        serviceSignal.await(1, TimeUnit.SECONDS);
+        assertThat(serviceSignal.getCount()).isEqualTo(0);
+
+        assertThat(iterator.hasNext()).isTrue();
+        assertThat(iterator.next()).isEqualTo(mocked);
+        assertThat(iterator.hasNext()).isFalse();
+    }
+
+    @Test public void testContentOnePassesErrorIfNoCacheWhenFailed() throws InterruptedException
+    {
+        final CountDownLatch cacheSignal = new CountDownLatch(1);
+        when(quickCache.get(new ItemId(478))).then(new Answer()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                cacheSignal.countDown();
+                return null;
+            }
+        });
+
+        final CountDownLatch serviceSignal = new CountDownLatch(1);
+        when(serviceRetrofit.getContent(anyString(), anyInt())).then(new Answer<Object>()
+        {
+            @Override public Object answer(InvocationOnMock invocation) throws Throwable
+            {
+                assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
+                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                serviceSignal.countDown();
+                return Observable.error(new IllegalArgumentException());
+            }
+        });
+        final CountDownLatch subscriberSignal = new CountDownLatch(2);
+        subscriptionList.add(service.getContent(new ItemId(478)).subscribe(new Action1<ItemDTO>()
+        {
+            @Override public void call(ItemDTO itemDTO)
+            {
+            }
+        }, new Action1<Throwable>()
+        {
+            @Override public void call(Throwable throwable)
+            {
+                subscriberSignal.countDown();
+                assertThat(throwable).isExactlyInstanceOf(IllegalArgumentException.class);
+                subscriberSignal.countDown();
+            }
+        }));
+        subscriberSignal.await(1, TimeUnit.SECONDS);
+        assertThat(subscriberSignal.getCount()).isEqualTo(0);
+        serviceSignal.await(1, TimeUnit.SECONDS);
+        assertThat(serviceSignal.getCount()).isEqualTo(0);
+        cacheSignal.await(1, TimeUnit.SECONDS);
+        assertThat(cacheSignal.getCount()).isEqualTo(0);
     }
 
     @Test public void testContentIterableCallsManyRetrofit() throws InterruptedException

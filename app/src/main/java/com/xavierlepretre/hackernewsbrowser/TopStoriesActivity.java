@@ -11,13 +11,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ViewAnimator;
 import android.widget.ViewSwitcher;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ycombinator.news.cache.QuickCache;
+import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemDTOList;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.service.HackerNewsRestAdapter;
@@ -211,6 +212,15 @@ public class TopStoriesActivity extends ActionBarActivity
                         {
                             @Override public Observable<LoadingItemDTO> call(List<ItemId> itemIds)
                             {
+                                ItemDTO cached;
+                                for (ItemId itemId : itemIds)
+                                {
+                                    cached = QuickCache.Instance.get().get(itemId);
+                                    if (cached != null)
+                                    {
+                                        adapter.add(cached);
+                                    }
+                                }
                                 adapter.setIds(itemIds);
                                 switcher.setDisplayedChild(CHILD_INDEX_LIST);
                                 pullToRefresh.setRefreshing(false);
