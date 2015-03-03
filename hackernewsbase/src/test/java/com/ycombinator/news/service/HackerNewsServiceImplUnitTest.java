@@ -152,7 +152,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo(478);
                 signal.countDown();
                 return mockedFirebase478;
             }
@@ -182,7 +182,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo(478);
                 serviceSignal.countDown();
                 return mockedFirebase478;
             }
@@ -213,7 +213,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo(478);
                 serviceSignal.countDown();
                 makeMockedFirebaseReturn(mockedFirebase478, mock(FirebaseError.class));
                 return mockedFirebase478;
@@ -246,7 +246,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo(478);
                 serviceSignal.countDown();
                 makeMockedFirebaseReturn(mockedFirebase478, mock(FirebaseError.class));
                 return mockedFirebase478;
@@ -284,7 +284,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
                 signal.countDown();
                 return mockedFirebase478;
             }
@@ -307,7 +307,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
                 signal.countDown();
                 return mockedFirebase478; // This way we can hold it up
             }
@@ -331,7 +331,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
                 signal.countDown();
                 return mockedFirebase478; // This way we can hold it up
             }
@@ -356,7 +356,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
                 signal.countDown();
                 return mockedFirebase478;
             }
@@ -388,7 +388,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
                 signal.countDown();
                 return mockedFirebase478; // This way we can hold it up
             }
@@ -412,7 +412,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo((int) signal.getCount());
                 signal.countDown();
                 return mockedFirebase478; // This way we can hold it up
             }
@@ -471,9 +471,9 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo(478);
                 signal.countDown();
-                makeMockedFirebaseReturn(mockedFirebase478, mockItemDTO(new ItemId((Integer) invocation.getArguments()[1])));
+                makeMockedFirebaseReturn(mockedFirebase478, mockItemDTO(new ItemId((Long) invocation.getArguments()[1])));
                 return mockedFirebase478;
             }
         });
@@ -502,8 +502,8 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                int id = (Integer) invocation.getArguments()[1];
-                assertThat(id).isIn(478, 479);
+                long id = (Long) invocation.getArguments()[1];
+                assertThat(id).isIn(478L, 479L);
                 signal.countDown();
                 Thread.sleep(1000);
                 ItemDTO mockedItemDTO = mockItemDTO(new ItemId(id));
@@ -554,7 +554,7 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                assertThat((Integer) invocation.getArguments()[1]).isEqualTo(478);
+                assertThat((Long) invocation.getArguments()[1]).isEqualTo(478);
                 signal.countDown();
                 makeMockedFirebaseReturn(mockedFirebase478, mock(FirebaseError.class));
                 return mockedFirebase478;
@@ -586,8 +586,8 @@ public class HackerNewsServiceImplUnitTest
             @Override public Object answer(InvocationOnMock invocation) throws Throwable
             {
                 assertThat((String) invocation.getArguments()[0]).isEqualTo("fakeVersion");
-                int id = (Integer) invocation.getArguments()[1];
-                assertThat(id).isIn(478, 479);
+                long id = (Long) invocation.getArguments()[1];
+                assertThat(id).isIn(478L, 479L);
                 signal.countDown();
                 if (id == 478)
                 {

@@ -22,7 +22,7 @@ public interface HackerNewsServiceRetrofit
     @GET("/{version}/item/{id}.json")
     Observable<ItemDTO> getContent(
             @Path("version") String version,
-            @Path("id") int id);
+            @Path("id") long id);
 
     @GET("/{version}/user/{id}.json")
     Observable<UserDTO> getUser(

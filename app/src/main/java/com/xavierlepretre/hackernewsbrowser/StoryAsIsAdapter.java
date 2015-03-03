@@ -54,15 +54,7 @@ public class StoryAsIsAdapter extends BaseAdapter
 
     @NonNull public Observable<ItemId> getRequestedIdsObservable()
     {
-        return requestedIdsSubject
-                .distinct(new Func1<ItemId, Integer>()
-                {
-                    @Override public Integer call(ItemId itemId)
-                    {
-                        return itemId.id;
-                    }
-                })
-                .asObservable();
+        return requestedIdsSubject.distinct();
     }
 
     @NonNull public Observable<PositionedItemId> getBackToParentObservable()

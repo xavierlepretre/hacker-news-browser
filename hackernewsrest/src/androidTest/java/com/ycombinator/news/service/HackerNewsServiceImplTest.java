@@ -145,7 +145,7 @@ public class HackerNewsServiceImplTest extends AndroidTestCase
             else if (loadingItemDTO instanceof LoadingItemFinishedDTO)
             {
                 ItemDTO itemDTO = ((LoadingItemFinishedDTO) loadingItemDTO).itemDTO;
-                switch (itemDTO.getId().id)
+                switch ((int) (long) itemDTO.getId().id)
                 {
                     case 160705:
                         assertThat(itemDTO).isNotNull();

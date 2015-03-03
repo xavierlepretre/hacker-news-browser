@@ -22,7 +22,7 @@ public class HackerNewsServiceFirebase
         return ref.child(version + "/maxitem/");
     }
 
-    @NonNull public Firebase getContent(@NonNull String version, int itemId)
+    @NonNull public Firebase getContent(@NonNull String version, long itemId)
     {
         return ref.child(version  + "/item/" + itemId);
     }

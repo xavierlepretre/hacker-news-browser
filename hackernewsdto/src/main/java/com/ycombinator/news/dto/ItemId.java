@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public class ItemId
 {
-    @NonNull public final Integer id;
+    @NonNull public final Long id;
 
-    @JsonCreator public ItemId(int id)
+    @JsonCreator public ItemId(long id)
     {
         this.id = id;
     }
@@ -26,7 +26,7 @@ public class ItemId
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @JsonValue Integer serialise()
+    @JsonValue Long serialise()
     {
         return id;
     }

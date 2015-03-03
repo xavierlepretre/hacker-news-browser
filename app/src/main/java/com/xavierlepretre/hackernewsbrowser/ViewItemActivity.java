@@ -112,7 +112,7 @@ public class ViewItemActivity extends ActionBarActivity
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         ButterKnife.inject(this);
 
-        this.showingItem = new ItemId(getIntent().getIntExtra(KEY_ITEM_ID, 0));
+        this.showingItem = new ItemId(getIntent().getLongExtra(KEY_ITEM_ID, 0));
         ItemViewDTO viewDTO = null;
         String serialised = getIntent().getStringExtra(KEY_ITEM_DTO);
         if (serialised != null)
