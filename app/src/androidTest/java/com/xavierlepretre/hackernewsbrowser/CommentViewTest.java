@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.OpenCommentDTO;
 import com.ycombinator.news.dto.UserId;
-import java.util.Date;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -50,7 +49,7 @@ public class CommentViewTest extends AndroidTestCase
     {
         view.displayComment(new CommentView.DTO(
                 getContext(),
-                new OpenCommentDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, new ItemId(2), "a good title", null),
+                new OpenCommentDTO(new ItemId(1), new UserId("fgtr"), 123L, false, new ItemId(2), "a good title", null),
                 0,
                 false));
         assertThat(view.author.getText().toString()).contains("fgtr");

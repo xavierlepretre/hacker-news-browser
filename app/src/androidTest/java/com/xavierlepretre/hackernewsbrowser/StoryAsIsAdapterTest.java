@@ -11,7 +11,6 @@ import com.ycombinator.news.dto.OpenJobDTO;
 import com.ycombinator.news.dto.OpenStoryDTO;
 import com.ycombinator.news.dto.UserId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import rx.functions.Action1;
@@ -77,9 +76,9 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testDoesNotCountDTOs()
     {
         assertThat(adapter.getCount()).isEqualTo(0);
-        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false));
         assertThat(adapter.getCount()).isEqualTo(0);
-        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("b"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("b"), 123L, false));
         assertThat(adapter.getCount()).isEqualTo(0);
     }
 
@@ -88,11 +87,11 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     {
         assertThat(adapter.getReceivedDtos()).isEmpty();
 
-        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false));
         assertThat(adapter.getReceivedDtos().size()).isEqualTo(1);
         assertThat(adapter.getReceivedDtos().get(0).getId()).isEqualTo(new ItemId(1));
 
-        adapter.add(new OpenItemDTO(new ItemId(2), new UserId("b"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(2), new UserId("b"), 123L, false));
         assertThat(adapter.getReceivedDtos().size()).isEqualTo(2);
         assertThat(adapter.getReceivedDtos().get(0).getId()).isEqualTo(new ItemId(1));
         assertThat(adapter.getReceivedDtos().get(1).getId()).isEqualTo(new ItemId(2));
@@ -111,7 +110,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
                 signal.countDown();
             }
         });
-        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false));
         signal.await(1, TimeUnit.SECONDS);
         assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
     }
@@ -129,7 +128,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
                 signal.countDown();
             }
         });
-        adapter.add(new ItemView.DTO(getContext(), new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false)));
+        adapter.add(new ItemView.DTO(getContext(), new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false)));
         signal.await(1, TimeUnit.SECONDS);
         assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
     }
@@ -148,8 +147,8 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
             }
         });
         adapter.addAll(Arrays.asList(
-                new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false),
-                new OpenItemDTO(new ItemId(2), new UserId("b"), new Date(), false)));
+                new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false),
+                new OpenItemDTO(new ItemId(2), new UserId("b"), 123L, false)));
         signal.await(1, TimeUnit.SECONDS);
         assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
     }
@@ -168,8 +167,8 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
             }
         });
         adapter.addAllViewDtos(Arrays.asList(
-                new ItemView.DTO(getContext(), new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false)),
-                new ItemView.DTO(getContext(), new OpenItemDTO(new ItemId(2), new UserId("b"), new Date(), false))));
+                new ItemView.DTO(getContext(), new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false)),
+                new ItemView.DTO(getContext(), new OpenItemDTO(new ItemId(2), new UserId("b"), 123L, false))));
         signal.await(1, TimeUnit.SECONDS);
         assertThat(signal.getCount()).isEqualTo(1).as("We should have waited for the timeout interruption");
     }
@@ -185,7 +184,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testGetItemReturnsDtoWhenHasIt()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false));
         assertThat(adapter.getItem(0)).isNotNull();
         //noinspection ConstantConditions
         assertThat(((ItemView.DTO) adapter.getItem(0)).itemDTO.getId()).isEqualTo(new ItemId(1));
@@ -202,7 +201,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testGetItemIdReturnsIdWhenHasDto()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false));
         assertThat(adapter.getItemId(0)).isEqualTo(1);
     }
 
@@ -227,7 +226,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testGetViewOfTypeItemWhenItemDto()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), new Date(), false));
+        adapter.add(new OpenItemDTO(new ItemId(1), new UserId("a"), 123L, false));
         View view = adapter.getView(0, null, null);
         assertThat(view).isExactlyInstanceOf(ItemView.class);
     }
@@ -236,7 +235,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testGetViewOfTypeStoryWhenStoryDto()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenStoryDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 32, null));
+        adapter.add(new OpenStoryDTO(new ItemId(1), new UserId("a"), 123L, false, "title", "url", 32, "no text", null, 34));
         View view = adapter.getView(0, null, null);
         assertThat(view).isExactlyInstanceOf(StoryView.class);
     }
@@ -245,7 +244,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testGetViewOfTypeJobWhenJobDto()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 32, "text"));
+        adapter.add(new OpenJobDTO(new ItemId(1), new UserId("a"), 123L, false, "title", "url", 32, "text"));
         View view = adapter.getView(0, null, null);
         assertThat(view).isExactlyInstanceOf(JobView.class);
     }
@@ -254,7 +253,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testGetViewOfTypeCommentWhenCommentDto()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenCommentDTO(new ItemId(1), new UserId("a"), new Date(), false, new ItemId(2), "title", null));
+        adapter.add(new OpenCommentDTO(new ItemId(1), new UserId("a"), 123L, false, new ItemId(2), "title", null));
         View view = adapter.getView(0, null, null);
         assertThat(view).isExactlyInstanceOf(CommentView.class);
     }
@@ -270,7 +269,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testAddLoadingViewDtoDoesNotOverwriteFullDto()
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new JobView.DTO(getContext(), new OpenJobDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 32, "text")));
+        adapter.add(new JobView.DTO(getContext(), new OpenJobDTO(new ItemId(1), new UserId("a"), 123L, false, "title", "url", 32, "text")));
         adapter.add(new LoadingItemView.DTO(getContext().getResources(), new ItemId(1), LoadingItemView.State.LOADING));
         assertThat(adapter.getItem(0)).isExactlyInstanceOf(JobView.DTO.class);
     }
@@ -331,7 +330,7 @@ public class StoryAsIsAdapterTest extends AndroidTestCase
     public void testProperDtoAndGetItemDoesNotRequestOnItemId() throws InterruptedException
     {
         adapter.setIds(Arrays.asList(new ItemId(1)));
-        adapter.add(new OpenStoryDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 32, null));
+        adapter.add(new OpenStoryDTO(new ItemId(1), new UserId("a"), 123L, false, "title", "url", 32, "no text", null, 34));
         final CountDownLatch signal = new CountDownLatch(1);
         adapter.getRequestedIdsObservable().subscribe(new Action1<ItemId>()
         {

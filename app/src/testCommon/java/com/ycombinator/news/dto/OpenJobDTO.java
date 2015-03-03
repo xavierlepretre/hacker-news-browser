@@ -3,7 +3,6 @@ package com.ycombinator.news.dto;
 import android.support.annotation.NonNull;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import java.util.Date;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -18,7 +17,7 @@ public class OpenJobDTO extends JobDTO
     public OpenJobDTO(
             @NonNull ItemId id,
             @NonNull UserId by,
-            @NonNull Date time,
+            @NonNull Long time,
             boolean deleted,
             @NonNull String title,
             @NonNull String url,

@@ -7,31 +7,26 @@ import android.test.ViewAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.view.View;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ycombinator.news.cache.QuickCache;
-import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.OpenCommentDTO;
 import com.ycombinator.news.dto.OpenStoryDTO;
 import com.ycombinator.news.dto.UserId;
-import com.ycombinator.news.service.ApiVersion;
-import com.ycombinator.news.service.EmptyHackerNewsServiceRetrofit;
 import com.ycombinator.news.service.HackerNewsService;
-import com.ycombinator.news.service.HackerNewsServiceRetrofit;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import retrofit.http.Path;
-import rx.Observable;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import rx.Subscription;
 import rx.functions.Action1;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ViewItemActivityUnitTest extends ActivityUnitTestCase<ViewItemActivity>
 {
-    private HackerNewsServiceRetrofit serviceRetrofit;
     private HackerNewsService hackerNewsService;
     private Intent defaultLaunchIntent;
 
@@ -48,17 +43,18 @@ public class ViewItemActivityUnitTest extends ActivityUnitTestCase<ViewItemActiv
                 new ObjectMapper(),
                 new ItemView.DTO(
                         getInstrumentation().getContext(),
-                        new OpenStoryDTO(new ItemId(1), new UserId("df"), new Date(), false, "title", "url", 1, Arrays.asList(new ItemId(2)))));
+                        new OpenStoryDTO(new ItemId(1), new UserId("df"), 123L, false, "title", "url", 1, "no text", Arrays.asList(new ItemId(2)), 34)));
         startActivity(defaultLaunchIntent, null, null);
 
-        serviceRetrofit = new EmptyHackerNewsServiceRetrofit()
-        {
-            @Override public Observable<ItemDTO> getContent(@Path("version") String version, @Path("id") int id)
-            {
-                return Observable.just((ItemDTO) new OpenCommentDTO(new ItemId(2), new UserId("a"), new Date(), false, new ItemId(1), "comment", null));
-            }
-        };
-        hackerNewsService = new HackerNewsService(serviceRetrofit, new ApiVersion("fake"), mock(QuickCache.class));
+        hackerNewsService = mock(HackerNewsService.class);
+        when(hackerNewsService.getContent(any(ItemId.class)))
+                .then(new Answer<Object>()
+                {
+                    @Override public Object answer(InvocationOnMock invocation) throws Throwable
+                    {
+                        return new OpenCommentDTO(new ItemId(2), new UserId("a"), 123L, false, new ItemId(1), "comment", null);
+                    }
+                });
         getActivity().hackerNewsService = hackerNewsService;
 
         final StoryAsIsAdapter commentAdapter = getActivity().commentAdapter;
@@ -68,7 +64,7 @@ public class ViewItemActivityUnitTest extends ActivityUnitTestCase<ViewItemActiv
         {
             @Override public void run()
             {
-                commentAdapter.add(new OpenCommentDTO(new ItemId(999999998), new UserId("a"), new Date(), false, new ItemId(999999999), "text", null));
+                commentAdapter.add(new OpenCommentDTO(new ItemId(999999998), new UserId("a"), 123L, false, new ItemId(999999999), "text", null));
                 commentAdapter.notifyDataSetChanged();
                 viewReady.countDown();
                 System.out.println("Counted down view ready");

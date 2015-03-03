@@ -19,6 +19,17 @@ android {
     }
   }
 
+  flavorDimensions "apiType"
+
+  productFlavors {
+    rest {
+      flavorDimension "apiType"
+    }
+    firebase {
+      flavorDimension "apiType"
+    }
+  }
+
   sourceSets {
     test {
       java {
@@ -46,7 +57,8 @@ dependencies {
   compile 'com.jakewharton:butterknife:6.1.0'
   compile 'com.ocpsoft:ocpsoft-pretty-time:1.0.7'
 
-  compile (project(':hackernewsrest'))
+  restCompile (project(':hackernewsrest'))
+  firebaseCompile (project(':hackernewsbase'))
 
 
   // Unit Tests

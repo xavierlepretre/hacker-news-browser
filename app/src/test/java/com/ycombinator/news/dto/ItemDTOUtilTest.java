@@ -1,7 +1,7 @@
 package com.ycombinator.news.dto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ycombinator.news.service.HackerNewsRestAdapter;
+import com.ycombinator.news.service.HackerNewsMapper;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class ItemDTOUtilTest
 
     @Before public void setUp()
     {
-        objectMapper = HackerNewsRestAdapter.createHackerNewsMapper();
+        objectMapper = HackerNewsMapper.createHackerNewsMapper();
     }
 
     @Test public void testActionBarTitleJob() throws IOException
@@ -105,7 +105,7 @@ public class ItemDTOUtilTest
         assertThat(ItemDTOUtil.getCopyableText(objectMapper.readValue(
                 getClass().getResourceAsStream("story_dto_1.json"),
                 ItemDTO.class)))
-                .isEqualTo("http://www.getdropbox.com/u/2/screencast.html");
+                .isEqualTo("");
     }
 
     @Test public void testCopyableTextPoll() throws IOException

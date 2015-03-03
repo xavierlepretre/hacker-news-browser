@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import java.util.Date;
 import java.util.List;
 
 @JsonTypeInfo(
@@ -20,7 +19,7 @@ public class OpenCommentDTO extends CommentDTO
     public OpenCommentDTO(
             @NonNull ItemId id,
             @NonNull UserId by,
-            @NonNull Date time,
+            @NonNull Long time,
             boolean deleted,
             @NonNull ItemId parent,
             @NonNull String text,

@@ -1,1 +1,1 @@
-include ':app', ':hackernewsrest'
+include ':app', ':hackernewsdto', ':hackernewsrest', ':hackernewsbase'

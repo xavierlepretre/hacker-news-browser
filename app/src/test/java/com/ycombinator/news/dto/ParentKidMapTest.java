@@ -2,7 +2,6 @@ package com.ycombinator.news.dto;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import org.junit.After;
@@ -44,7 +43,7 @@ public class ParentKidMapTest
 
     @Test public void testAddOneItemStartsAsExpandedAtZero()
     {
-        map.put(new ItemDTO(new ItemId(1), new UserId("a"), new Date(), false));
+        map.put(new ItemDTO(new ItemId(1), new UserId("a"), 123L, false));
         assertThat(map.getCollapsibleState(new ItemId(1))).isNotNull();
         //noinspection ConstantConditions
         assertThat(map.getCollapsibleState(new ItemId(1)).isCollapsed()).isFalse();
@@ -54,8 +53,8 @@ public class ParentKidMapTest
 
     @Test public void testAddOneChildIsCollapsedAndAtOne()
     {
-        map.put(new StoryDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 123, Arrays.asList(new ItemId(2))));
-        map.put(new CommentDTO(new ItemId(2), new UserId("a"), new Date(), false, new ItemId(1), "text", null));
+        map.put(new StoryDTO(new ItemId(1), new UserId("a"), 123L, false, "title", "url", 123, null, Arrays.asList(new ItemId(2)), 2));
+        map.put(new CommentDTO(new ItemId(2), new UserId("a"), 123L, false, new ItemId(1), "text", null));
         assertThat(map.getCollapsibleState(new ItemId(2))).isNotNull();
         //noinspection ConstantConditions
         assertThat(map.getCollapsibleState(new ItemId(2)).isCollapsed()).isTrue();
@@ -65,15 +64,15 @@ public class ParentKidMapTest
 
     @Test public void testOneChildOneParentFlattenHasOnlyChild()
     {
-        map.put(new StoryDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 123, Arrays.asList(new ItemId(2))));
-        map.put(new CommentDTO(new ItemId(2), new UserId("a"), new Date(), false, new ItemId(1), "text", null));
+        map.put(new StoryDTO(new ItemId(1), new UserId("a"), 123L, false, "title", "url", 123, null, Arrays.asList(new ItemId(2)), 2));
+        map.put(new CommentDTO(new ItemId(2), new UserId("a"), 123L, false, new ItemId(1), "text", null));
         assertThat(map.flattenPrimoGeniture(new ItemId(1))).isEqualTo(Arrays.asList(new ItemId(2)));
     }
 
     @Test public void testOneChildOneParentButCollapsedFlattenHasNothing()
     {
-        map.put(new StoryDTO(new ItemId(1), new UserId("a"), new Date(), false, "title", "url", 123, Arrays.asList(new ItemId(2))));
-        map.put(new CommentDTO(new ItemId(2), new UserId("a"), new Date(), false, new ItemId(1), "text", null));
+        map.put(new StoryDTO(new ItemId(1), new UserId("a"), 123L, false, "title", "url", 123, null, Arrays.asList(new ItemId(2)), 2));
+        map.put(new CommentDTO(new ItemId(2), new UserId("a"), 123L, false, new ItemId(1), "text", null));
         map.toggleCollapsedState(new ItemId(1));
         assertThat(map.flattenPrimoGeniture(new ItemId(1))).isEmpty();
     }

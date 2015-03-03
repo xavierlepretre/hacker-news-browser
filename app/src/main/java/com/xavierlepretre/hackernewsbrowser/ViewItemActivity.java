@@ -31,8 +31,9 @@ import com.ycombinator.news.dto.ItemDTO;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.ParentItemDTO;
 import com.ycombinator.news.dto.ParentKidMap;
-import com.ycombinator.news.service.HackerNewsRestAdapter;
+import com.ycombinator.news.service.HackerNewsMapper;
 import com.ycombinator.news.service.HackerNewsService;
+import com.ycombinator.news.service.HackerNewsServiceFactory;
 import com.ycombinator.news.service.LoadingItemDTO;
 import com.ycombinator.news.service.LoadingItemFinishedDTO;
 import java.io.IOException;
@@ -103,8 +104,8 @@ public class ViewItemActivity extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         this.parentKidMap = new ParentKidMap();
-        this.hackerNewsService = HackerNewsRestAdapter.createHackerNewsService();
-        this.objectMapper = HackerNewsRestAdapter.createHackerNewsMapper();
+        this.hackerNewsService = HackerNewsServiceFactory.createHackerNewsService(this);
+        this.objectMapper = HackerNewsMapper.createHackerNewsMapper();
         this.requiredIdsSubject = BehaviorSubject.create();
 
         setContentView(R.layout.activity_view_item);

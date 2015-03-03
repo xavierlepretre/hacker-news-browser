@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.OpenStoryDTO;
 import com.ycombinator.news.dto.UserId;
-import java.util.Date;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -54,7 +53,7 @@ public class StoryViewTest extends AndroidTestCase
     {
         view.displayStory(new StoryView.DTO(
                 getContext(),
-                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, "a good title", "http://url1.com", 345, null)));
+                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), 123L, false, "a good title", "http://url1.com", 345, "no text", null, 34)));
         assertThat(view.author.getText().toString()).contains("fgtr");
         assertThat(view.age.getText()).isNotNull();
         assertThat(view.title.getText().toString()).contains("a good title");
@@ -67,7 +66,7 @@ public class StoryViewTest extends AndroidTestCase
         view = (StoryView) LayoutInflater.from(getContext()).inflate(R.layout.story_header, null);
         view.displayStory(new StoryView.DTO(
                 getContext(),
-                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, "a good title", "http://url1.com", 345, null)));
+                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), 123L, false, "a good title", "http://url1.com", 345, "no text", null, 34)));
         assertThat(view.author.getText().toString()).contains("fgtr");
         assertThat(view.age.getText()).isNotNull();
         assertThat(view.title.getText().toString()).contains("a good title");
@@ -79,7 +78,7 @@ public class StoryViewTest extends AndroidTestCase
     {
         view.displayStory(new StoryView.DTO(
                 getContext(),
-                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), new Date(), false, "a good title", "http://url1.com", 345, null)));
+                new OpenStoryDTO(new ItemId(1), new UserId("fgtr"), 123L, false, "a good title", "http://url1.com", 345, "no text", null, 34)));
         Intent browserIntent = view.getBrowserIntent();
         //noinspection ConstantConditions
         assertThat(browserIntent.getData().toString()).contains("http://url1.com");

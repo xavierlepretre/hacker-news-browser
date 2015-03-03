@@ -61,7 +61,9 @@ public class StoryView extends ItemView
             this.title = storyDTO.getTitle();
             this.score = NumberFormat.getIntegerInstance().format(storyDTO.getScore());
             int count = storyDTO.getKids().size();
-            this.commentCount = NumberFormat.getInstance().format(count);
+            this.commentCount = String.format("%1$s (%2$s)",
+                    NumberFormat.getInstance().format(count),
+                    NumberFormat.getInstance().format(storyDTO.getDescendants()));
         }
     }
 }

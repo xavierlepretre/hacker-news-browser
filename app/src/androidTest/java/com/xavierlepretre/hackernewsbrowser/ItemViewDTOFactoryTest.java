@@ -13,7 +13,6 @@ import com.ycombinator.news.dto.UserId;
 import com.ycombinator.news.service.OpenLoadingItemFinishedDTO;
 import com.ycombinator.news.service.OpenLoadingItemStartedDTO;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -40,12 +39,14 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                         new OpenStoryDTO(
                                 new ItemId(1),
                                 new UserId("a"),
-                                new Date(),
+                                123L,
                                 false,
                                 "title",
                                 "http://urlshouldbe.ok/here",
                                 32,
-                                null))).isExactlyInstanceOf(StoryView.DTO.class);
+                                "no text",
+                                null,
+                                34))).isExactlyInstanceOf(StoryView.DTO.class);
     }
 
     @SmallTest
@@ -58,7 +59,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                                 new OpenJobDTO(
                                         new ItemId(1),
                                         new UserId("a"),
-                                        new Date(),
+                                        123L,
                                         false,
                                         "title",
                                         "url",
@@ -76,7 +77,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                                 new OpenCommentDTO(
                                         new ItemId(2),
                                         new UserId("a"),
-                                        new Date(),
+                                        123L,
                                         false,
                                         new ItemId(1),
                                         "text",
@@ -92,7 +93,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                         new OpenCommentDTO(
                                 new ItemId(2),
                                 new UserId("a"),
-                                new Date(),
+                                123L,
                                 false,
                                 new ItemId(1),
                                 "text",
@@ -112,7 +113,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                         new OpenCommentDTO(
                                 new ItemId(2),
                                 new UserId("a"),
-                                new Date(),
+                                123L,
                                 false,
                                 new ItemId(1),
                                 "text",
@@ -131,7 +132,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                 new OpenCommentDTO(
                         new ItemId(2),
                         new UserId("a"),
-                        new Date(),
+                        123L,
                         false,
                         new ItemId(1),
                         "text",
@@ -150,7 +151,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                 new OpenCommentDTO(
                         new ItemId(2),
                         new UserId("a"),
-                        new Date(),
+                        123L,
                         false,
                         new ItemId(1),
                         "text",
@@ -173,7 +174,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                                 new OpenItemDTO(
                                         new ItemId(1),
                                         new UserId("a"),
-                                        new Date(),
+                                        123L,
                                         false)))).isExactlyInstanceOf(ItemView.DTO.class);
     }
 
@@ -184,7 +185,7 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                 new OpenJobDTO(
                         new ItemId(1),
                         new UserId("a"),
-                        new Date(),
+                        123L,
                         false,
                         "title",
                         "url",
@@ -193,12 +194,14 @@ public class ItemViewDTOFactoryTest extends AndroidTestCase
                 new OpenStoryDTO(
                         new ItemId(2),
                         new UserId("a"),
-                        new Date(),
+                        123L,
                         false,
                         "title",
                         "http://urlshouldbe.ok/here",
                         32,
-                        null));
+                        "not text",
+                        null,
+                        34));
         List<ItemViewDTO> created = ItemViewDTOFactory.create(getContext(), list);
         assertThat(created.size()).isEqualTo(2);
         assertThat(created.get(0)).isExactlyInstanceOf(JobView.DTO.class);

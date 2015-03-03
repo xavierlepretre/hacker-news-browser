@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import com.ycombinator.news.dto.ItemId;
 import com.ycombinator.news.dto.OpenItemDTO;
 import com.ycombinator.news.dto.UserId;
-import java.util.Date;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -48,7 +47,7 @@ public class ItemViewTest extends AndroidTestCase
     {
         view.displayItem(new ItemView.DTO(
                 getContext(),
-                new OpenItemDTO(new ItemId(1), new UserId("fgtr"), new Date(), false)));
+                new OpenItemDTO(new ItemId(1), new UserId("fgtr"), 123L, false)));
         assertThat(view.author.getText().toString()).contains("fgtr");
         assertThat(view.age.getText()).isNotNull();
     }
@@ -58,7 +57,7 @@ public class ItemViewTest extends AndroidTestCase
     {
         view.displayItem(new ItemView.DTO(
                 getContext(),
-                new OpenItemDTO(new ItemId(1098), new UserId("fgtr"), new Date(), false)));
+                new OpenItemDTO(new ItemId(1098), new UserId("fgtr"), 123L, false)));
         Intent browserIntent = view.getBrowserIntent();
         //noinspection ConstantConditions
         assertThat(browserIntent.getData().toString()).contains("1098");
